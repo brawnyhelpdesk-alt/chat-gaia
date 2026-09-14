@@ -2,8 +2,6 @@
 
 ## Regla común de atención
 
-GAIA envía automáticamente la palabra clave `GAIA_SOLICITUD` junto con una clave específica del caso, por ejemplo `GAIA_PASSWORD_MICROSOFT_OFFICE_365`. El usuario no tiene que escribirla ni proporcionar datos personales.
-
 1. Confirmar la solicitud elegida y recopilar únicamente los datos del caso.
 2. Resumir lo entendido y avisar: “Voy a escalar esta solicitud con el equipo responsable.”
 3. Transferir a un agente con el servicio, plataforma, tipo de solicitud y detalle ya recopilados.

@@ -49,8 +49,7 @@
     if (!authenticated || !currentCedula || !selectedFlow || !selectedChoice) return;
     const current = ++attempt;
     const requestType = flowLabels[selectedFlow];
-    const caseKey = `GAIA_${slug(selectedFlow).toUpperCase()}_${slug(selectedChoice).toUpperCase()}`;
-    const initialMessage = `GAIA_SOLICITUD: ${caseKey}\nNueva solicitud: ${requestType}\nPlataforma o equipo: ${selectedChoice}\nPor favor, guíame con este caso.`;
+    const initialMessage = `Nueva solicitud: ${requestType}\nPlataforma o equipo: ${selectedChoice}\nPor favor, guíame con este caso.`;
     timeout = setTimeout(function () { fail(current, "GAIA está tardando en responder. Intenta de nuevo."); }, 20000);
     try {
       window.zE("messenger:set", "conversationFields", [{ id: FIELD_CEDULA, value: currentCedula }], function () {
