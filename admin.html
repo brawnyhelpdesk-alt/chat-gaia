@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Administración de opciones | GAIA</title>
+  <link rel="icon" type="image/png" href="assets/gaia.png">
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin.js" defer></script>
+</head>
+<body>
+  <main class="admin-shell">
+    <a class="admin-brand" href="/" aria-label="Volver a GAIA"><img src="assets/gaia.png" alt=""> <span>GAIA<small>ASCENDIS · GRUPO CORRIPIO</small></span></a>
+    <section id="login-card" class="admin-card" aria-labelledby="login-title">
+      <p class="eyebrow">ADMINISTRACIÓN</p>
+      <h1 id="login-title">Opciones de GAIA</h1>
+      <p>Accede con la credencial de administrador para crear opciones sin editar código.</p>
+      <form id="login-form" novalidate>
+        <label for="admin-password">Contraseña de administrador</label>
+        <input id="admin-password" type="password" autocomplete="current-password" required>
+        <button type="submit">Acceder</button>
+        <p id="login-notice" class="notice" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <section id="admin-card" class="admin-card" hidden aria-labelledby="admin-title">
+      <div class="admin-heading"><div><p class="eyebrow">ADMINISTRACIÓN</p><h1 id="admin-title">Opciones disponibles</h1><p>Crea hasta diez opciones adicionales para la pantalla de solicitudes.</p></div><button id="logout" class="quiet-button" type="button">Cerrar sesión</button></div>
+      <div id="option-list" class="option-list" aria-live="polite"></div>
+      <form id="option-form" class="option-form" novalidate>
+        <h2>Nueva opción</h2>
+        <div class="two-columns"><div><label for="option-title">Título</label><input id="option-title" maxlength="70" required placeholder="Ej. Solicitud de transporte"></div><div><label for="option-id">Identificador</label><input id="option-id" maxlength="40" pattern="[a-z0-9-]+" required placeholder="transporte"></div></div>
+        <label for="option-description">Descripción breve</label><input id="option-description" maxlength="120" required placeholder="Explica en una línea para qué sirve">
+        <label for="option-question">Pregunta de GAIA</label><input id="option-question" maxlength="140" required placeholder="¿Qué tipo de transporte necesitas?">
+        <label for="option-choices">Alternativas</label><textarea id="option-choices" maxlength="1200" required placeholder="Una alternativa por línea&#10;Traslado de empleado&#10;Transporte de mercancía"></textarea>
+        <button type="submit">Agregar opción</button>
+        <p id="option-notice" class="notice" role="status" aria-live="polite"></p>
+      </form>
+      <button id="save-options" class="save-button" type="button">Guardar cambios publicados</button>
+    </section>
+  </main>
+</body>
+</html>

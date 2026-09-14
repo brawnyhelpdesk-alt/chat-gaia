@@ -22,7 +22,7 @@
         <img class="brand-avatar" src="assets/gaia.png" alt="" width="44" height="44">
         <span>GAIA<small>ASCENDIS · GRUPO CORRIPIO</small></span>
       </div>
-      <span class="channel-label">Canal de atención corporativo</span>
+      <span class="channel-label">Canal corporativo de atención</span>
     </header>
     <main>
       <section class="card landing" aria-labelledby="titulo">
@@ -45,12 +45,14 @@
           <h2 id="solicitud-titulo">Inicia una nueva solicitud</h2>
           <p class="request-intro">Selecciona una opción para que GAIA te guíe paso a paso.</p>
           <div class="quick-grid" aria-label="Solicitudes frecuentes">
-            <button class="quick-choice emphasis" type="button" data-flow="password"><span>🔑</span><strong>Olvidé mi contraseña</strong><small>Restablecer acceso</small></button>
-            <button class="quick-choice" type="button" data-flow="access"><span>↗</span><strong>Necesito acceso</strong><small>Aplicación, carpeta o internet</small></button>
-            <button class="quick-choice" type="button" data-flow="failure"><span>!</span><strong>Reportar una falla</strong><small>Internet, sistema o equipo</small></button>
-            <button class="quick-choice" type="button" data-flow="configuration"><span>⚙</span><strong>Configuración</strong><small>Equipo, Office o antivirus</small></button>
-            <button class="quick-choice" type="button" data-flow="equipment"><span>▣</span><strong>Equipo o dispositivo</strong><small>Solicitud, cambio o impresora</small></button>
-            <button class="quick-choice" type="button" data-flow="system"><span>⌘</span><strong>Sistema o plataforma</strong><small>IGC, Dynamics, Telynet y más</small></button>
+            <button class="quick-choice emphasis" type="button" data-flow="password"><span class="choice-icon" aria-hidden="true">⌘</span><strong>Olvidé mi contraseña</strong><small>Restablecer acceso</small></button>
+            <button class="quick-choice" type="button" data-flow="access"><span class="choice-icon" aria-hidden="true">↗</span><strong>Necesito acceso</strong><small>Aplicación, carpeta o internet</small></button>
+            <button class="quick-choice" type="button" data-flow="failure"><span class="choice-icon" aria-hidden="true">!</span><strong>Reportar una falla</strong><small>Internet, sistema o equipo</small></button>
+            <button class="quick-choice" type="button" data-flow="configuration"><span class="choice-icon" aria-hidden="true">⚙</span><strong>Configuración</strong><small>Equipo, Office o antivirus</small></button>
+            <button class="quick-choice" type="button" data-flow="equipment"><span class="choice-icon" aria-hidden="true">▣</span><strong>Equipo o dispositivo</strong><small>Solicitud, cambio o impresora</small></button>
+            <button class="quick-choice" type="button" data-flow="system"><span class="choice-icon" aria-hidden="true">◇</span><strong>Sistema o plataforma</strong><small>IGC, Dynamics, Telynet y más</small></button>
+            <button class="quick-choice consultation-choice" type="button" id="hacer-consulta"><span class="choice-icon" aria-hidden="true">?</span><strong>Hacer consulta</strong><small>Pregunta lo que necesites a GAIA</small></button>
+            <div id="custom-options" class="custom-options" aria-live="polite"></div>
           </div>
           <button id="mis-conversaciones" class="secondary-button" type="button">Ver mis conversaciones</button>
         </section>

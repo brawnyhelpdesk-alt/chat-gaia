@@ -18,7 +18,7 @@
     system: { title: "¿Sobre qué sistema es tu solicitud?", choices: ["IGC", "Microsoft Dynamics", "Telynet", "App Corripio", "Base de Datos", "Zendesk"] }
   };
   const flowLabels = { password: "Cambio de contraseña", access: "Solicitud de acceso", failure: "Reporte de falla", configuration: "Configuración", equipment: "Equipo o dispositivo", system: "Sistema o plataforma" };
-  const form = document.getElementById("identificacion"), input = document.getElementById("cedula"), fields = document.getElementById("datos-cedula"), button = document.getElementById("continuar"), notice = document.getElementById("aviso"), panel = document.getElementById("chat-panel"), requestPanel = document.getElementById("request-panel"), detailPanel = document.getElementById("detail-panel"), confirmPanel = document.getElementById("confirm-panel"), detailTitle = document.getElementById("detalle-titulo"), detailChoices = document.getElementById("detail-choices"), selectionSummary = document.getElementById("selection-summary");
+  const form = document.getElementById("identificacion"), input = document.getElementById("cedula"), fields = document.getElementById("datos-cedula"), button = document.getElementById("continuar"), notice = document.getElementById("aviso"), panel = document.getElementById("chat-panel"), requestPanel = document.getElementById("request-panel"), detailPanel = document.getElementById("detail-panel"), confirmPanel = document.getElementById("confirm-panel"), detailTitle = document.getElementById("detalle-titulo"), detailChoices = document.getElementById("detail-choices"), selectionSummary = document.getElementById("selection-summary"), customOptions = document.getElementById("custom-options");
   let widgetAvailable = false, authenticated = false, currentCedula = "", selectedFlow = "", selectedChoice = "", attempt = 0, timeout, inactivityTimer, awaitingReply = false;
   function message(text, error) { notice.textContent = text; notice.className = error ? "notice error" : "notice"; }
   function hideRequestPanels() { requestPanel.hidden = detailPanel.hidden = confirmPanel.hidden = true; }
@@ -40,11 +40,67 @@
     flows[flow].choices.forEach(function (choice) { const option = document.createElement("button"); option.type = "button"; option.className = "detail-choice"; option.textContent = choice; option.addEventListener("click", function () { selectedChoice = choice; detailPanel.hidden = true; selectionSummary.textContent = `${flowLabels[selectedFlow]} · ${choice}`; confirmPanel.hidden = false; }); detailChoices.appendChild(option); });
     detailPanel.hidden = false;
   }
+  function addCustomOption(option) {
+    if (!option || typeof option !== "object" || !/^[a-z0-9_-]{2,40}$/i.test(option.id) || !Array.isArray(option.choices) || !option.choices.length) return;
+    const key = `custom_${option.id.toLowerCase()}`;
+    if (flows[key]) return;
+    const title = String(option.title || "Nueva solicitud").slice(0, 70);
+    const question = String(option.question || "¿Qué necesitas?").slice(0, 140);
+    const description = String(option.description || "Solicitud corporativa").slice(0, 120);
+    const choices = option.choices.filter(function (choice) { return typeof choice === "string" && choice.trim().length; }).slice(0, 12).map(function (choice) { return choice.trim().slice(0, 100); });
+    if (!choices.length) return;
+    flows[key] = { title: question, choices: choices };
+    flowLabels[key] = title;
+    const optionButton = document.createElement("button");
+    optionButton.className = "quick-choice";
+    optionButton.type = "button";
+    optionButton.dataset.flow = key;
+    const icon = document.createElement("span"), optionTitle = document.createElement("strong"), optionDescription = document.createElement("small");
+    icon.className = "choice-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "+";
+    optionTitle.textContent = title;
+    optionDescription.textContent = description;
+    optionButton.append(icon, optionTitle, optionDescription);
+    optionButton.addEventListener("click", function () { showFlow(key); });
+    customOptions.appendChild(optionButton);
+  }
+  async function loadCustomOptions() {
+    try {
+      const response = await fetch("/api/options", { credentials: "same-origin", cache: "no-store" });
+      if (!response.ok) return;
+      const config = await response.json();
+      if (!config || !Array.isArray(config.options)) return;
+      config.options.forEach(addCustomOption);
+    } catch {}
+  }
   function renderChat(current) { if (current !== attempt) return; showChat(); window.zE("messenger", "render", { mode: "embedded", widget: { targetElement: "#gaia-chat" } }, function (error) { if (current !== attempt) return; if (error) { fail(current, "No pudimos abrir GAIA. Intenta de nuevo."); return; } clearTimeout(timeout); input.value = ""; button.disabled = false; message("Tu conversación con GAIA está abierta."); }); }
   async function requestMessagingToken(cedula) { const response = await fetch("/api/gaia-token", { method: "POST", credentials: "same-origin", cache: "no-store", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cedula: cedula }) }); if (!response.ok) throw new Error("token-request-failed"); const body = await response.json(); if (!body || typeof body.jwt !== "string" || body.jwt.length < 20) throw new Error("invalid-token-response"); return body.jwt; }
   async function authenticate(current, cedula) { let jwt; try { jwt = await requestMessagingToken(cedula); } catch { fail(current, "No pudimos verificar tu acceso. Intenta de nuevo."); return; } if (current !== attempt) return; try { window.zE("messenger", "loginUser", function (callback) { callback(jwt); }, function (error) { if (current !== attempt) return; if (error) { fail(current, "No pudimos verificar tu acceso. Intenta de nuevo."); return; } clearTimeout(timeout); authenticated = true; currentCedula = cedula; button.disabled = false; form.hidden = true; message(""); showLanding(); }); } catch { fail(current, "No pudimos verificar tu acceso. Intenta de nuevo."); } }
   function slug(value) { return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40); }
   function openExistingConversations() { if (!authenticated || !currentCedula) return; const current = ++attempt; timeout = setTimeout(function () { fail(current, "GAIA está tardando en responder. Intenta de nuevo."); }, 20000); try { window.zE("messenger:set", "conversationFields", [{ id: FIELD_CEDULA, value: currentCedula }], function () { renderChat(current); }); } catch { fail(current, "No pudimos preparar la conversación. Intenta de nuevo."); } }
+  function startConsultation() {
+    if (!authenticated || !currentCedula) return;
+    const current = ++attempt;
+    timeout = setTimeout(function () { fail(current, "GAIA está tardando en responder. Intenta de nuevo."); }, 20000);
+    try {
+      window.zE("messenger:set", "conversationFields", [{ id: FIELD_CEDULA, value: currentCedula }], function () {
+        window.zE("messenger:set", "conversationTags", ["gaia", "gaia_consulta"]);
+        window.zE("messenger:set", "conversationMetadata", { source: "gaia_web", request_type: "Consulta" });
+        showChat();
+        window.zE("messenger", "render", { mode: "embedded", widget: { targetElement: "#gaia-chat" } }, function (renderError) {
+          if (current !== attempt) return;
+          if (renderError) { fail(current, "No pudimos abrir GAIA. Intenta de nuevo."); return; }
+          window.zE("messenger", "newConversation", { displayName: "Consulta con GAIA", metadata: { source: "gaia_web", request_type: "Consulta" } }, function (conversationError, conversation) {
+            if (current !== attempt) return;
+            if (conversationError) { fail(current, "No pudimos abrir la consulta. Intenta de nuevo."); return; }
+            window.zE("messenger:ui", "navigation", { screen: "Conversation", options: { conversationId: conversation.id } });
+            clearTimeout(timeout); input.value = ""; button.disabled = false; startInactivityTimer(); message("Escribe tu consulta para que GAIA pueda ayudarte.");
+          });
+        });
+      });
+    } catch { fail(current, "No pudimos preparar la consulta. Intenta de nuevo."); }
+  }
   function startNewConversation() {
     if (!authenticated || !currentCedula || !selectedFlow || !selectedChoice) return;
     const current = ++attempt;
@@ -73,6 +129,8 @@
   let checks = 0; const waiting = setInterval(function () { try { if (connectWidget()) clearInterval(waiting); else if (++checks >= 50) { clearInterval(waiting); message("No pudimos cargar GAIA. Actualiza la página e intenta de nuevo.", true); } } catch { clearInterval(waiting); message("No pudimos cargar GAIA. Actualiza la página e intenta de nuevo.", true); } }, 300);
   input.addEventListener("input", function () { input.removeAttribute("aria-invalid"); });
   document.querySelectorAll("[data-flow]").forEach(function (choice) { choice.addEventListener("click", function () { showFlow(choice.dataset.flow); }); });
+  document.getElementById("hacer-consulta").addEventListener("click", startConsultation);
   document.getElementById("volver-solicitudes").addEventListener("click", showLanding); document.getElementById("cambiar-solicitud").addEventListener("click", function () { showFlow(selectedFlow); }); document.getElementById("abrir-solicitud").addEventListener("click", startNewConversation); document.getElementById("mis-conversaciones").addEventListener("click", openExistingConversations); document.getElementById("volver").addEventListener("click", showLanding); document.getElementById("cerrar-sesion").addEventListener("click", function () { endSession("Tu sesión fue cerrada."); }); window.addEventListener("pagehide", function () { clearInactivityTimer(); input.value = ""; });
   form.addEventListener("submit", function (event) { event.preventDefault(); if (button.disabled) return; const cedula = normalizeCedula(input.value); if (!cedula) { input.setAttribute("aria-invalid", "true"); message("Ingresa los 11 dígitos de tu cédula, con o sin guiones. No incluyas letras.", true); input.focus(); return; } if (!widgetAvailable) { message("GAIA todavía está cargando. Intenta de nuevo en un momento.", true); return; } button.disabled = true; message("Verificando tu acceso con GAIA…"); const current = ++attempt; timeout = setTimeout(function () { fail(current, "GAIA está tardando en responder. Intenta de nuevo."); }, 20000); authenticate(current, cedula); });
+  loadCustomOptions();
 })();
