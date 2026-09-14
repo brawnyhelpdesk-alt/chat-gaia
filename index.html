@@ -1,117 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GAIA | ASCENDIS</title>
-<meta name="description" content="GAIA, asistente corporativo de ASCENDIS para Grupo Corripio.">
-<style>
-  :root { --navy:#0b3157; --navy-deep:#071c35; --cyan:#17b5c3; --ink:#17314a; --muted:#60738a; }
-  * { box-sizing:border-box; }
-  html,body { min-height:100%; margin:0; }
-  body { min-height:100vh; font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ink); background:#edf4f8; }
-  .shell { min-height:100vh; display:grid; grid-template-rows:auto 1fr auto; }
-  header { padding:20px clamp(22px,6vw,88px); display:flex; align-items:center; justify-content:space-between; background:#fff; border-bottom:1px solid rgba(11,49,87,.08); }
-  .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.04em; color:var(--navy); }
-  .brand-mark { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; color:#fff; background:linear-gradient(135deg,var(--navy),#1a5b90); font-size:18px; }
-  .brand small { display:block; margin-top:2px; font-size:10px; font-weight:700; letter-spacing:.1em; color:#7b8da1; }
-  .secure { font-size:13px; color:#557089; display:flex; gap:7px; align-items:center; }
-  main { display:grid; place-items:center; padding:48px 22px; background:radial-gradient(circle at 15% 15%,rgba(23,181,195,.16),transparent 28rem),linear-gradient(135deg,#edf5f9,#dfeef5); }
-  .card { width:min(100%,510px); overflow:hidden; border:1px solid rgba(11,49,87,.1); border-radius:22px; background:#fff; box-shadow:0 24px 55px rgba(7,28,53,.14); }
-  .card-top { padding:34px 36px 30px; color:#fff; background:linear-gradient(135deg,var(--navy-deep),var(--navy)); }
-  .orb { width:54px; height:54px; display:grid; place-items:center; margin-bottom:18px; border:1px solid rgba(255,255,255,.28); border-radius:17px; background:rgba(23,181,195,.18); color:#80edf3; font-size:27px; }
-  h1 { margin:0 0 9px; font-size:30px; letter-spacing:-.03em; }
-  .card-top p { margin:0; line-height:1.55; color:rgba(255,255,255,.78); }
-  form { padding:31px 36px 34px; }
-  label { display:block; margin-bottom:8px; font-size:14px; font-weight:750; color:#294760; }
-  .help { margin:-2px 0 16px; font-size:13px; line-height:1.45; color:var(--muted); }
-  input { width:100%; height:54px; padding:0 16px; border:1px solid #c7d7e2; border-radius:11px; outline:none; color:var(--ink); font-size:18px; letter-spacing:.06em; transition:border-color .15s,box-shadow .15s; }
-  input:focus { border-color:var(--cyan); box-shadow:0 0 0 4px rgba(23,181,195,.15); }
-  button { width:100%; min-height:52px; margin-top:18px; border:0; border-radius:11px; background:var(--cyan); color:#fff; font:inherit; font-weight:800; cursor:pointer; box-shadow:0 9px 20px rgba(23,181,195,.27); transition:transform .15s,background .15s; }
-  button:hover { transform:translateY(-1px); background:#10a6b3; }
-  button:disabled { cursor:wait; opacity:.7; transform:none; }
-  .notice { min-height:20px; margin:15px 0 0; font-size:13px; text-align:center; color:#657a90; }
-  .notice.error { color:#b42318; }
-  .privacy { margin:22px 0 0; font-size:12px; line-height:1.5; text-align:center; color:#7b8da1; }
-  footer { padding:20px 24px; font-size:12px; text-align:center; color:#70849a; background:#fff; }
-  @media (max-width:520px) { header { padding:16px 20px; } .secure { display:none; } main { padding:26px 16px; } .card-top,form { padding-left:25px; padding-right:25px; } }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="GAIA te orienta y canaliza tus solicitudes.">
+  <meta name="theme-color" content="#0b3157">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>GAIA | ASCENDIS</title>
+  <link rel="icon" type="image/png" href="assets/gaia.png">
+  <link rel="apple-touch-icon" href="assets/gaia.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="widget-init.js"></script>
+  <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=c60b16af-3696-4bb7-854d-cd1f982cea2e" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
   <div class="shell">
-    <header>
-      <div class="brand"><span class="brand-mark">G</span><span>GAIA<small>ASCENDIS · GRUPO CORRIPIO</small></span></div>
-      <div class="secure">⌁ Canal de atención corporativo</div>
+    <header class="site-header">
+      <div class="brand">
+        <img class="brand-avatar" src="assets/gaia.png" alt="" width="44" height="44">
+        <span>GAIA<small>ASCENDIS · GRUPO CORRIPIO</small></span>
+      </div>
+      <span class="channel-label">Canal de atención corporativo</span>
     </header>
     <main>
-      <section class="card" aria-labelledby="titulo">
+      <section class="card landing" aria-labelledby="titulo">
         <div class="card-top">
-          <div class="orb">◌</div>
+          <img class="gaia-avatar" src="assets/gaia.png" alt="GAIA" width="90" height="90">
           <h1 id="titulo">¿En qué podemos ayudarte?</h1>
-          <p>GAIA te orienta y canaliza tu solicitud con el equipo de ASCENDIS que corresponde.</p>
+          <p>GAIA te orienta y canaliza tus solicitudes.</p>
         </div>
         <form id="identificacion" novalidate>
-          <label for="cedula">Tu cédula</label>
-          <p class="help">La usaremos para identificar tu solicitud y registrar el caso con la información correcta.</p>
-          <input id="cedula" name="cedula" inputmode="numeric" autocomplete="off" placeholder="000-0000000-0" maxlength="13" aria-describedby="aviso">
+          <div id="datos-cedula">
+            <label for="cedula">Tu cédula</label>
+            <p class="help" id="ayuda-cedula">Puedes escribirla con o sin guiones.</p>
+            <input id="cedula" name="cedula" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="000-0000000-0" maxlength="32" aria-describedby="ayuda-cedula aviso" required>
+          </div>
           <button id="continuar" type="submit">Continuar con GAIA</button>
           <p class="notice" id="aviso" role="status" aria-live="polite">Cargando canal de atención…</p>
-          <p class="privacy">Tu cédula se registra únicamente en el ticket de atención de GAIA.</p>
+          <p class="privacy">Tu cédula se enviará junto con tu solicitud.</p>
         </form>
+        <noscript><p class="noscript">Activa JavaScript en tu navegador para usar GAIA.</p></noscript>
+      </section>
+      <section class="chat-panel" id="chat-panel" aria-label="Chat con GAIA" hidden>
+        <div class="chat-tools"><span>Tu conversación con GAIA</span><button id="volver" class="back-button" type="button">Volver</button></div>
+        <div id="gaia-chat"></div>
       </section>
     </main>
     <footer>ASCENDIS · Servicios corporativos para Grupo Corripio</footer>
   </div>
-  <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=c60b16af-3696-4bb7-854d-cd1f982cea2e"></script>
-  <script>
-  (function () {
-    var FIELD_CEDULA = "55732322097179";
-    var form = document.getElementById("identificacion");
-    var cedula = document.getElementById("cedula");
-    var boton = document.getElementById("continuar");
-    var aviso = document.getElementById("aviso");
-    var widgetListo = false;
-    function mensaje(texto, error) {
-      aviso.textContent = texto;
-      aviso.className = error ? "notice error" : "notice";
-    }
-    function formato(valor) {
-      var digitos = valor.replace(/\D/g, "").slice(0, 11);
-      if (digitos.length > 3 && digitos.length <= 10) return digitos.slice(0,3) + "-" + digitos.slice(3);
-      if (digitos.length > 10) return digitos.slice(0,3) + "-" + digitos.slice(3,10) + "-" + digitos.slice(10);
-      return digitos;
-    }
-    cedula.addEventListener("input", function () { cedula.value = formato(cedula.value); });
-    var intentos = 0;
-    var espera = setInterval(function () {
-      if (typeof window.zE !== "function") {
-        if (++intentos > 50) { clearInterval(espera); mensaje("No pudimos cargar GAIA. Actualiza la página e intenta de nuevo.", true); }
-        return;
-      }
-      clearInterval(espera);
-      widgetListo = true;
-      try { window.zE("messenger", "hide"); } catch (e) {}
-      mensaje("Ingresa tu cédula para continuar.");
-    }, 300);
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      var valor = cedula.value.replace(/\D/g, "");
-      if (valor.length !== 11) { mensaje("Ingresa una cédula válida de 11 dígitos.", true); cedula.focus(); return; }
-      if (!widgetListo) { mensaje("GAIA todavía está cargando. Intenta de nuevo en un momento.", true); return; }
-      boton.disabled = true;
-      mensaje("Preparando tu conversación con GAIA…");
-      try {
-        window.zE("messenger:set", "conversationFields", [{ id: FIELD_CEDULA, value: valor }], function () {
-          try {
-            window.zE("messenger:set", "conversationMetadata", { cedula: valor, origen: "portal_gaia" });
-            window.zE("messenger", "show");
-            window.zE("messenger", "open");
-            mensaje("GAIA está lista para atenderte.");
-          } catch (e) { mensaje("No pudimos abrir GAIA. Intenta de nuevo.", true); boton.disabled = false; }
-        });
-      } catch (e) { mensaje("No pudimos preparar la conversación. Intenta de nuevo.", true); boton.disabled = false; }
-    });
-  })();
-  </script>
 </body>
 </html>
