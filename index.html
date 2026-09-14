@@ -35,12 +35,39 @@
           <div id="datos-cedula">
             <label for="cedula">Tu cédula</label>
             <p class="help" id="ayuda-cedula">Puedes escribirla con o sin guiones.</p>
-            <input id="cedula" name="cedula" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="000-0000000-0" maxlength="32" aria-describedby="ayuda-cedula aviso" required>
+            <input id="cedula" name="cedula" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="000-0000000-0" maxlength="32" aria-describedby="ayuda-cedula aviso" required>
           </div>
           <button id="continuar" type="submit">Continuar con GAIA</button>
           <p class="notice" id="aviso" role="status" aria-live="polite">Cargando canal de atención…</p>
           <p class="privacy">Tu cédula se enviará junto con tu solicitud.</p>
         </form>
+        <section id="request-panel" class="request-panel" hidden aria-labelledby="solicitud-titulo">
+          <h2 id="solicitud-titulo">Inicia una nueva solicitud</h2>
+          <p class="request-intro">Selecciona una opción para que GAIA te guíe paso a paso.</p>
+          <div class="quick-grid" aria-label="Solicitudes frecuentes">
+            <button class="quick-choice emphasis" type="button" data-flow="password"><span>🔑</span><strong>Olvidé mi contraseña</strong><small>Restablecer acceso</small></button>
+            <button class="quick-choice" type="button" data-flow="access"><span>↗</span><strong>Necesito acceso</strong><small>Aplicación, carpeta o internet</small></button>
+            <button class="quick-choice" type="button" data-flow="failure"><span>!</span><strong>Reportar una falla</strong><small>Internet, sistema o equipo</small></button>
+            <button class="quick-choice" type="button" data-flow="configuration"><span>⚙</span><strong>Configuración</strong><small>Equipo, Office o antivirus</small></button>
+            <button class="quick-choice" type="button" data-flow="equipment"><span>▣</span><strong>Equipo o dispositivo</strong><small>Solicitud, cambio o impresora</small></button>
+            <button class="quick-choice" type="button" data-flow="system"><span>⌘</span><strong>Sistema o plataforma</strong><small>IGC, Dynamics, Telynet y más</small></button>
+          </div>
+          <button id="mis-conversaciones" class="secondary-button" type="button">Ver mis conversaciones</button>
+        </section>
+        <section id="detail-panel" class="request-panel" hidden aria-labelledby="detalle-titulo">
+          <button id="volver-solicitudes" class="text-button" type="button">← Volver a solicitudes</button>
+          <h2 id="detalle-titulo">¿Sobre qué plataforma?</h2>
+          <p id="detalle-ayuda" class="request-intro">Elige la opción que mejor describe tu caso.</p>
+          <div id="detail-choices" class="detail-choices"></div>
+        </section>
+        <section id="confirm-panel" class="request-panel" hidden aria-labelledby="confirmacion-titulo">
+          <button id="cambiar-solicitud" class="text-button" type="button">← Cambiar solicitud</button>
+          <p class="eyebrow">NUEVA SOLICITUD</p>
+          <h2 id="confirmacion-titulo">Confirmar solicitud</h2>
+          <p id="selection-summary" class="selection-summary"></p>
+          <p class="request-intro">GAIA recopilará los datos necesarios y te conectará con el equipo responsable.</p>
+          <button id="abrir-solicitud" class="primary-button" type="button">Continuar con GAIA</button>
+        </section>
         <noscript><p class="noscript">Activa JavaScript en tu navegador para usar GAIA.</p></noscript>
       </section>
       <section class="chat-panel" id="chat-panel" aria-label="Chat con GAIA" hidden>
