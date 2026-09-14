@@ -70,6 +70,55 @@
     });
   }
 
+  async function requestMessagingToken(cedula) {
+    const response = await fetch("/api/gaia-token", {
+      method: "POST",
+      credentials: "same-origin",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cedula: cedula })
+    });
+    if (!response.ok) throw new Error("token-request-failed");
+    const body = await response.json();
+    if (!body || typeof body.jwt !== "string" || body.jwt.length < 20) {
+      throw new Error("invalid-token-response");
+    }
+    return body.jwt;
+  }
+
+  async function authenticateAndRender(current, cedula) {
+    let jwt;
+    try {
+      jwt = await requestMessagingToken(cedula);
+    } catch (error) {
+      fail(current, "No pudimos verificar tu acceso. Intenta de nuevo.");
+      return;
+    }
+
+    if (current !== attempt) return;
+    try {
+      window.zE("messenger", "loginUser", function (callback) {
+        callback(jwt);
+      }, function (error) {
+        if (current !== attempt) return;
+        if (error) {
+          fail(current, "No pudimos verificar tu acceso. Intenta de nuevo.");
+          return;
+        }
+        try {
+          window.zE("messenger:set", "conversationFields", [{ id: FIELD_CEDULA, value: cedula }], function () {
+            try { renderChat(current); }
+            catch (renderError) { fail(current, "No pudimos abrir GAIA. Intenta de nuevo."); }
+          });
+        } catch (fieldError) {
+          fail(current, "No pudimos preparar la conversación. Intenta de nuevo.");
+        }
+      });
+    } catch (error) {
+      fail(current, "No pudimos verificar tu acceso. Intenta de nuevo.");
+    }
+  }
+
   function connectWidget() {
     if (typeof window.zE !== "function") return false;
     window.zE("messenger:set", "locale", "es");
@@ -114,17 +163,13 @@
       return;
     }
     button.disabled = true;
-    message("Preparando tu conversación con GAIA…");
+    message("Verificando tu acceso con GAIA…");
     const current = ++attempt;
     timeout = setTimeout(function () {
       fail(current, "GAIA está tardando en responder. Intenta de nuevo.");
     }, 20000);
     try {
-      // This is a user-supplied ticket field. It does not authenticate a Zendesk profile.
-      window.zE("messenger:set", "conversationFields", [{ id: FIELD_CEDULA, value: cedula }], function () {
-        try { renderChat(current); }
-        catch (error) { fail(current, "No pudimos abrir GAIA. Intenta de nuevo."); }
-      });
+      authenticateAndRender(current, cedula);
     } catch (error) {
       fail(current, "No pudimos preparar la conversación. Intenta de nuevo.");
     }
