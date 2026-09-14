@@ -18,9 +18,17 @@
     system: { title: "¿Sobre qué sistema es tu solicitud?", choices: ["IGC", "Microsoft Dynamics", "Telynet", "App Corripio", "Base de Datos", "Zendesk"] }
   };
   const flowLabels = { password: "Cambio de contraseña", access: "Solicitud de acceso", failure: "Reporte de falla", configuration: "Configuración", equipment: "Equipo o dispositivo", system: "Sistema o plataforma" };
+  const defaultIcons = { password: "key", access: "access", failure: "alert", configuration: "settings", equipment: "laptop", system: "system", consultation: "consultation" };
   const form = document.getElementById("identificacion"), input = document.getElementById("cedula"), fields = document.getElementById("datos-cedula"), button = document.getElementById("continuar"), notice = document.getElementById("aviso"), panel = document.getElementById("chat-panel"), requestPanel = document.getElementById("request-panel"), detailPanel = document.getElementById("detail-panel"), confirmPanel = document.getElementById("confirm-panel"), detailTitle = document.getElementById("detalle-titulo"), detailChoices = document.getElementById("detail-choices"), selectionSummary = document.getElementById("selection-summary"), customOptions = document.getElementById("custom-options");
   let widgetAvailable = false, authenticated = false, currentCedula = "", selectedFlow = "", selectedChoice = "", attempt = 0, timeout, inactivityTimer, awaitingReply = false;
   function message(text, error) { notice.textContent = text; notice.className = error ? "notice error" : "notice"; }
+  function setIcon(target, name) { if (!target) return; target.replaceChildren(); if (typeof window.gaiaIconElement === "function") target.appendChild(window.gaiaIconElement(name)); }
+  function applyIcons(overrides) {
+    document.querySelectorAll("[data-option-key]").forEach(function (button) {
+      const key = button.dataset.optionKey, icon = button.querySelector(".choice-icon");
+      setIcon(icon, overrides?.[key] || defaultIcons[key] || "sparkles");
+    });
+  }
   function hideRequestPanels() { requestPanel.hidden = detailPanel.hidden = confirmPanel.hidden = true; }
   function showLanding() { document.body.classList.remove("chat-active"); panel.hidden = true; if (authenticated) { form.hidden = true; hideRequestPanels(); requestPanel.hidden = false; return; } form.hidden = false; fields.hidden = false; hideRequestPanels(); button.disabled = false; button.textContent = "Continuar con GAIA"; }
   function showChat() { panel.hidden = false; document.body.classList.add("chat-active"); }
@@ -58,7 +66,7 @@
     const icon = document.createElement("span"), optionTitle = document.createElement("strong"), optionDescription = document.createElement("small");
     icon.className = "choice-icon";
     icon.setAttribute("aria-hidden", "true");
-    icon.textContent = "+";
+    setIcon(icon, option.icon || "sparkles");
     optionTitle.textContent = title;
     optionDescription.textContent = description;
     optionButton.append(icon, optionTitle, optionDescription);
@@ -70,8 +78,9 @@
       const response = await fetch("/api/options", { credentials: "same-origin", cache: "no-store" });
       if (!response.ok) return;
       const config = await response.json();
-      if (!config || !Array.isArray(config.options)) return;
-      config.options.forEach(addCustomOption);
+      if (!config) return;
+      applyIcons(config.icons);
+      if (Array.isArray(config.options)) config.options.forEach(addCustomOption);
     } catch {}
   }
   function renderChat(current) { if (current !== attempt) return; showChat(); window.zE("messenger", "render", { mode: "embedded", widget: { targetElement: "#gaia-chat" } }, function (error) { if (current !== attempt) return; if (error) { fail(current, "No pudimos abrir GAIA. Intenta de nuevo."); return; } clearTimeout(timeout); input.value = ""; button.disabled = false; message("Tu conversación con GAIA está abierta."); }); }
@@ -132,5 +141,5 @@
   document.getElementById("hacer-consulta").addEventListener("click", startConsultation);
   document.getElementById("volver-solicitudes").addEventListener("click", showLanding); document.getElementById("cambiar-solicitud").addEventListener("click", function () { showFlow(selectedFlow); }); document.getElementById("abrir-solicitud").addEventListener("click", startNewConversation); document.getElementById("mis-conversaciones").addEventListener("click", openExistingConversations); document.getElementById("volver").addEventListener("click", showLanding); document.getElementById("cerrar-sesion").addEventListener("click", function () { endSession("Tu sesión fue cerrada."); }); window.addEventListener("pagehide", function () { clearInactivityTimer(); input.value = ""; });
   form.addEventListener("submit", function (event) { event.preventDefault(); if (button.disabled) return; const cedula = normalizeCedula(input.value); if (!cedula) { input.setAttribute("aria-invalid", "true"); message("Ingresa los 11 dígitos de tu cédula, con o sin guiones. No incluyas letras.", true); input.focus(); return; } if (!widgetAvailable) { message("GAIA todavía está cargando. Intenta de nuevo en un momento.", true); return; } button.disabled = true; message("Verificando tu acceso con GAIA…"); const current = ++attempt; timeout = setTimeout(function () { fail(current, "GAIA está tardando en responder. Intenta de nuevo."); }, 20000); authenticate(current, cedula); });
-  loadCustomOptions();
+  applyIcons(); loadCustomOptions();
 })();

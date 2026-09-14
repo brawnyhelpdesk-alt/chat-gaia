@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="widget-init.js"></script>
   <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=c60b16af-3696-4bb7-854d-cd1f982cea2e" defer></script>
+  <script src="icons.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -45,13 +46,13 @@
           <h2 id="solicitud-titulo">Inicia una nueva solicitud</h2>
           <p class="request-intro">Selecciona una opción para que GAIA te guíe paso a paso.</p>
           <div class="quick-grid" aria-label="Solicitudes frecuentes">
-            <button class="quick-choice emphasis" type="button" data-flow="password"><span class="choice-icon" aria-hidden="true">⌘</span><strong>Olvidé mi contraseña</strong><small>Restablecer acceso</small></button>
-            <button class="quick-choice" type="button" data-flow="access"><span class="choice-icon" aria-hidden="true">↗</span><strong>Necesito acceso</strong><small>Aplicación, carpeta o internet</small></button>
-            <button class="quick-choice" type="button" data-flow="failure"><span class="choice-icon" aria-hidden="true">!</span><strong>Reportar una falla</strong><small>Internet, sistema o equipo</small></button>
-            <button class="quick-choice" type="button" data-flow="configuration"><span class="choice-icon" aria-hidden="true">⚙</span><strong>Configuración</strong><small>Equipo, Office o antivirus</small></button>
-            <button class="quick-choice" type="button" data-flow="equipment"><span class="choice-icon" aria-hidden="true">▣</span><strong>Equipo o dispositivo</strong><small>Solicitud, cambio o impresora</small></button>
-            <button class="quick-choice" type="button" data-flow="system"><span class="choice-icon" aria-hidden="true">◇</span><strong>Sistema o plataforma</strong><small>IGC, Dynamics, Telynet y más</small></button>
-            <button class="quick-choice consultation-choice" type="button" id="hacer-consulta"><span class="choice-icon" aria-hidden="true">?</span><strong>Hacer consulta</strong><small>Pregunta lo que necesites a GAIA</small></button>
+            <button class="quick-choice emphasis" type="button" data-flow="password" data-option-key="password"><span class="choice-icon" aria-hidden="true"></span><strong>Olvidé mi contraseña</strong><small>Restablecer acceso</small></button>
+            <button class="quick-choice" type="button" data-flow="access" data-option-key="access"><span class="choice-icon" aria-hidden="true"></span><strong>Necesito acceso</strong><small>Aplicación, carpeta o internet</small></button>
+            <button class="quick-choice" type="button" data-flow="failure" data-option-key="failure"><span class="choice-icon" aria-hidden="true"></span><strong>Reportar una falla</strong><small>Internet, sistema o equipo</small></button>
+            <button class="quick-choice" type="button" data-flow="configuration" data-option-key="configuration"><span class="choice-icon" aria-hidden="true"></span><strong>Configuración</strong><small>Equipo, Office o antivirus</small></button>
+            <button class="quick-choice" type="button" data-flow="equipment" data-option-key="equipment"><span class="choice-icon" aria-hidden="true"></span><strong>Equipo o dispositivo</strong><small>Solicitud, cambio o impresora</small></button>
+            <button class="quick-choice" type="button" data-flow="system" data-option-key="system"><span class="choice-icon" aria-hidden="true"></span><strong>Sistema o plataforma</strong><small>IGC, Dynamics, Telynet y más</small></button>
+            <button class="quick-choice consultation-choice" type="button" id="hacer-consulta" data-option-key="consultation"><span class="choice-icon" aria-hidden="true"></span><strong>Hacer consulta</strong><small>Pregunta lo que necesites a GAIA</small></button>
             <div id="custom-options" class="custom-options" aria-live="polite"></div>
           </div>
           <button id="mis-conversaciones" class="secondary-button" type="button">Ver mis conversaciones</button>

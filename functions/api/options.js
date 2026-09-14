@@ -21,17 +21,24 @@ function safeOptions(value) {
       title: typeof item.title === "string" ? item.title.slice(0, 70) : "Nueva solicitud",
       description: typeof item.description === "string" ? item.description.slice(0, 120) : "Solicitud corporativa",
       question: typeof item.question === "string" ? item.question.slice(0, 140) : "¿Qué necesitas?",
+      icon: typeof item.icon === "string" && /^[a-z0-9-]{2,40}$/i.test(item.icon) ? item.icon.toLowerCase() : "sparkles",
       choices
     }];
   });
 }
 
+function safeIcons(value) {
+  const permitted = new Set(["password", "access", "failure", "configuration", "equipment", "system", "consultation"]);
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).flatMap(([key, icon]) => permitted.has(key) && typeof icon === "string" && /^[a-z0-9-]{2,40}$/i.test(icon) ? [[key, icon.toLowerCase()]] : []));
+}
+
 export async function onRequestGet({ env }) {
   try {
     const saved = env.GAIA_OPTIONS ? await env.GAIA_OPTIONS.get("custom-options", "json") : null;
-    return json({ options: safeOptions(saved?.options) });
+    return json({ options: safeOptions(saved?.options), icons: safeIcons(saved?.icons) });
   } catch {
-    return json({ options: [] });
+    return json({ options: [], icons: {} });
   }
 }
 

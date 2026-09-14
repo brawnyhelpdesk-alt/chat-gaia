@@ -91,6 +91,8 @@ export function clearCookie() {
   return "gaia_admin=; Path=/api/admin/; HttpOnly; Secure; SameSite=Strict; Max-Age=0";
 }
 
+const baseOptionKeys = new Set(["password", "access", "failure", "configuration", "equipment", "system", "consultation"]);
+
 export function validOptions(value) {
   if (!Array.isArray(value) || value.length > 10) return null;
   const ids = new Set();
@@ -105,7 +107,18 @@ export function validOptions(value) {
     if (item.title.length > 70 || item.description.length > 120 || item.question.length > 140 || !Array.isArray(item.choices) || item.choices.length < 1 || item.choices.length > 12) return null;
     const choices = item.choices.map((choice) => typeof choice === "string" ? choice.trim() : "").filter(Boolean);
     if (choices.length !== item.choices.length || choices.some((choice) => choice.length > 100)) return null;
-    cleaned.push({ id, title: item.title.trim(), description: item.description.trim(), question: item.question.trim(), choices });
+    const icon = typeof item.icon === "string" && /^[a-z0-9-]{2,40}$/i.test(item.icon) ? item.icon.toLowerCase() : "sparkles";
+    cleaned.push({ id, title: item.title.trim(), description: item.description.trim(), question: item.question.trim(), choices, icon });
+  }
+  return cleaned;
+}
+
+export function validIcons(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).length > baseOptionKeys.size) return null;
+  const cleaned = {};
+  for (const [key, icon] of Object.entries(value)) {
+    if (!baseOptionKeys.has(key) || typeof icon !== "string" || !/^[a-z0-9-]{2,40}$/i.test(icon)) return null;
+    cleaned[key] = icon.toLowerCase();
   }
   return cleaned;
 }

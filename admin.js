@@ -1,47 +1,22 @@
 (function () {
   "use strict";
-  const loginCard = document.getElementById("login-card"), adminCard = document.getElementById("admin-card"), loginForm = document.getElementById("login-form"), loginPassword = document.getElementById("admin-password"), loginNotice = document.getElementById("login-notice"), optionForm = document.getElementById("option-form"), optionList = document.getElementById("option-list"), optionNotice = document.getElementById("option-notice"), saveButton = document.getElementById("save-options");
-  let options = [];
-  function note(target, text, error) { target.textContent = text; target.className = error ? "notice error" : "notice"; }
-  function render() {
-    optionList.replaceChildren();
-    if (!options.length) { const empty = document.createElement("p"); empty.className = "empty"; empty.textContent = "Aún no hay opciones adicionales."; optionList.appendChild(empty); return; }
-    options.forEach(function (option, index) {
-      const item = document.createElement("article"), heading = document.createElement("h3"), details = document.createElement("p"), remove = document.createElement("button");
-      item.className = "saved-option"; heading.textContent = option.title; details.textContent = `${option.question} · ${option.choices.length} alternativas`; remove.type = "button"; remove.className = "remove-button"; remove.textContent = "Eliminar";
-      remove.addEventListener("click", function () { options.splice(index, 1); render(); note(optionNotice, "Hay cambios sin publicar."); });
-      item.append(heading, details, remove); optionList.appendChild(item);
-    });
-  }
-  async function request(url, method, body) {
-    const response = await fetch(url, { method, credentials: "same-origin", headers: body ? { "Content-Type": "application/json" } : {}, body: body ? JSON.stringify(body) : undefined, cache: "no-store" });
-    const data = await response.json().catch(function () { return {}; });
-    if (!response.ok) throw new Error(data.error || "request_failed");
-    return data;
-  }
-  async function openAdmin() {
-    const data = await request("/api/admin/options", "GET");
-    options = Array.isArray(data.options) ? data.options : [];
-    loginCard.hidden = true; adminCard.hidden = false; render();
-  }
-  loginForm.addEventListener("submit", async function (event) {
-    event.preventDefault(); note(loginNotice, "");
-    try { await request("/api/admin/login", "POST", { password: loginPassword.value }); loginPassword.value = ""; await openAdmin(); }
-    catch (error) { note(loginNotice, error.message === "invalid_credentials" ? "No pudimos validar la credencial." : "El panel no está disponible. Verifica su configuración.", true); }
-  });
-  optionForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const title = document.getElementById("option-title").value.trim(), id = document.getElementById("option-id").value.trim().toLowerCase(), description = document.getElementById("option-description").value.trim(), question = document.getElementById("option-question").value.trim();
-    const choices = document.getElementById("option-choices").value.split(/\r?\n/).map(function (choice) { return choice.trim(); }).filter(Boolean);
-    if (!/^[a-z0-9-]{2,40}$/.test(id) || !title || !description || !question || !choices.length || choices.length > 12 || options.some(function (option) { return option.id === id; })) { note(optionNotice, "Revisa el identificador y las alternativas antes de agregar la opción.", true); return; }
-    if (options.length >= 10) { note(optionNotice, "Solo se permiten diez opciones adicionales.", true); return; }
-    options.push({ id, title, description, question, choices }); optionForm.reset(); render(); note(optionNotice, "Opción agregada. Guarda los cambios para publicarla.");
-  });
-  saveButton.addEventListener("click", async function () {
-    saveButton.disabled = true; note(optionNotice, "Guardando cambios…");
-    try { const data = await request("/api/admin/options", "PUT", { options }); options = data.options; render(); note(optionNotice, "Cambios publicados en GAIA."); }
-    catch { note(optionNotice, "No pudimos publicar los cambios. Inicia sesión de nuevo e intenta otra vez.", true); }
-    finally { saveButton.disabled = false; }
-  });
-  document.getElementById("logout").addEventListener("click", async function () { try { await request("/api/admin/logout", "POST"); } catch {} options = []; adminCard.hidden = true; loginCard.hidden = false; loginPassword.focus(); });
+  const $ = (id) => document.getElementById(id);
+  const loginCard = $("login-card"), adminCard = $("admin-card"), loginForm = $("login-form"), password = $("admin-password"), loginNotice = $("login-notice"), form = $("option-form"), list = $("option-list"), notice = $("option-notice"), save = $("save-options"), baseList = $("base-icon-list"), newIcon = $("option-icon");
+  const catalog = window.GAIA_ICON_CATALOG || { sparkles: "Nuevo" };
+  const defaults = { password: "key", access: "access", failure: "alert", configuration: "settings", equipment: "laptop", system: "system", consultation: "consultation" };
+  const base = [["password", "Olvidé mi contraseña"], ["access", "Necesito acceso"], ["failure", "Reportar una falla"], ["configuration", "Configuración"], ["equipment", "Equipo o dispositivo"], ["system", "Sistema o plataforma"], ["consultation", "Hacer consulta"]];
+  let options = [], icons = {};
+  const note = (target, text, error) => { target.textContent = text; target.className = error ? "notice error" : "notice"; };
+  function icon(name) { const box = document.createElement("span"); box.className = "icon-preview"; if (window.gaiaIconElement) box.appendChild(window.gaiaIconElement(name)); return box; }
+  function select(value) { const el = document.createElement("select"); Object.entries(catalog).forEach(([id, label]) => { const item = document.createElement("option"); item.value = id; item.textContent = label; item.selected = id === value; el.appendChild(item); }); return el; }
+  function addChangeIcon(row, selected, change) { const picker = select(selected); picker.addEventListener("change", () => { change(picker.value); const old = row.querySelector(".icon-preview"); old.replaceWith(icon(picker.value)); note(notice, "Hay cambios sin publicar."); }); row.appendChild(picker); }
+  function renderBase() { baseList.replaceChildren(); base.forEach(([id, title]) => { const row = document.createElement("div"), name = document.createElement("strong"); row.className = "icon-row"; name.textContent = title; row.append(icon(icons[id] || defaults[id]), name); addChangeIcon(row, icons[id] || defaults[id], (value) => { icons[id] = value; }); baseList.appendChild(row); }); }
+  function render() { renderBase(); list.replaceChildren(); if (!options.length) { const empty = document.createElement("p"); empty.className = "empty"; empty.textContent = "Aún no hay opciones adicionales."; list.appendChild(empty); return; } options.forEach((item, index) => { const row = document.createElement("article"), title = document.createElement("h3"), detail = document.createElement("p"), remove = document.createElement("button"); row.className = "saved-option"; title.textContent = item.title; detail.textContent = `${item.question} · ${item.choices.length} alternativas`; remove.type = "button"; remove.className = "remove-button"; remove.textContent = "Eliminar"; remove.addEventListener("click", () => { options.splice(index, 1); render(); note(notice, "Hay cambios sin publicar."); }); row.append(icon(item.icon || "sparkles"), title, detail); addChangeIcon(row, item.icon || "sparkles", (value) => { item.icon = value; }); row.appendChild(remove); list.appendChild(row); }); }
+  async function api(url, method, body) { const response = await fetch(url, { method, credentials: "same-origin", headers: body ? { "Content-Type": "application/json" } : {}, body: body ? JSON.stringify(body) : undefined, cache: "no-store" }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "request_failed"); return data; }
+  async function open() { const data = await api("/api/admin/options", "GET"); options = Array.isArray(data.options) ? data.options : []; icons = data.icons && typeof data.icons === "object" ? data.icons : {}; loginCard.hidden = true; adminCard.hidden = false; render(); }
+  loginForm.addEventListener("submit", async (event) => { event.preventDefault(); note(loginNotice, ""); try { await api("/api/admin/login", "POST", { password: password.value }); password.value = ""; await open(); } catch (error) { note(loginNotice, error.message === "invalid_credentials" ? "No pudimos validar la credencial." : "El panel no está disponible. Verifica su configuración.", true); } });
+  form.addEventListener("submit", (event) => { event.preventDefault(); const title = $("option-title").value.trim(), id = $("option-id").value.trim().toLowerCase(), description = $("option-description").value.trim(), question = $("option-question").value.trim(), choices = $("option-choices").value.split(/\r?\n/).map((value) => value.trim()).filter(Boolean); if (!/^[a-z0-9-]{2,40}$/.test(id) || !title || !description || !question || !choices.length || choices.length > 12 || options.some((item) => item.id === id)) return note(notice, "Revisa el identificador y las alternativas antes de agregar la opción.", true); if (options.length >= 10) return note(notice, "Solo se permiten diez opciones adicionales.", true); options.push({ id, title, description, question, choices, icon: newIcon.value }); form.reset(); newIcon.value = "sparkles"; render(); note(notice, "Opción agregada. Guarda los cambios para publicarla."); });
+  save.addEventListener("click", async () => { save.disabled = true; note(notice, "Guardando cambios…"); try { const data = await api("/api/admin/options", "PUT", { options, icons }); options = data.options; icons = data.icons; render(); note(notice, "Cambios publicados en GAIA."); } catch { note(notice, "No pudimos publicar los cambios. Inicia sesión de nuevo e intenta otra vez.", true); } finally { save.disabled = false; } });
+  $("logout").addEventListener("click", async () => { try { await api("/api/admin/logout", "POST"); } catch {} options = []; icons = {}; adminCard.hidden = true; loginCard.hidden = false; password.focus(); });
+  Object.entries(catalog).forEach(([id, label]) => { const item = document.createElement("option"); item.value = id; item.textContent = label; newIcon.appendChild(item); }); newIcon.value = "sparkles";
 })();

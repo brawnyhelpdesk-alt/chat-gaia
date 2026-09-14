@@ -8,6 +8,7 @@
   <title>Administración de opciones | GAIA</title>
   <link rel="icon" type="image/png" href="assets/gaia.png">
   <link rel="stylesheet" href="admin.css">
+  <script src="icons.js" defer></script>
   <script src="admin.js" defer></script>
 </head>
 <body>
@@ -26,6 +27,7 @@
     </section>
     <section id="admin-card" class="admin-card" hidden aria-labelledby="admin-title">
       <div class="admin-heading"><div><p class="eyebrow">ADMINISTRACIÓN</p><h1 id="admin-title">Opciones disponibles</h1><p>Crea hasta diez opciones adicionales para la pantalla de solicitudes.</p></div><button id="logout" class="quiet-button" type="button">Cerrar sesión</button></div>
+      <section class="icon-section" aria-labelledby="base-icons-title"><h2 id="base-icons-title">Íconos de opciones actuales</h2><p>Elige un ícono corporativo para cada opción. Se mostrará al guardar los cambios.</p><div id="base-icon-list" class="base-icon-list"></div></section>
       <div id="option-list" class="option-list" aria-live="polite"></div>
       <form id="option-form" class="option-form" novalidate>
         <h2>Nueva opción</h2>
@@ -33,6 +35,7 @@
         <label for="option-description">Descripción breve</label><input id="option-description" maxlength="120" required placeholder="Explica en una línea para qué sirve">
         <label for="option-question">Pregunta de GAIA</label><input id="option-question" maxlength="140" required placeholder="¿Qué tipo de transporte necesitas?">
         <label for="option-choices">Alternativas</label><textarea id="option-choices" maxlength="1200" required placeholder="Una alternativa por línea&#10;Traslado de empleado&#10;Transporte de mercancía"></textarea>
+        <label for="option-icon">Ícono</label><select id="option-icon" required aria-describedby="icon-help"></select><p id="icon-help" class="field-help">Catálogo local de íconos corporativos.</p>
         <button type="submit">Agregar opción</button>
         <p id="option-notice" class="notice" role="status" aria-live="polite"></p>
       </form>

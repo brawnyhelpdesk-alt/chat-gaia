@@ -24,7 +24,8 @@ form { padding:28px 36px 30px; }
 .custom-options { display:contents; }
 .quick-choice { min-height:118px; padding:16px; border:1px solid var(--line); border-radius:14px; text-align:left; color:var(--ink); background:#fff; box-shadow:0 1px 0 rgba(7,53,99,.02); transition:border-color .15s,background .15s,box-shadow .15s,transform .15s; }
 .quick-choice:hover { border-color:#0d9aaa; background:#f4fbfc; box-shadow:0 9px 19px rgba(7,53,99,.08); transform:translateY(-1px); }
-.choice-icon { display:block; width:30px; height:30px; margin-bottom:10px; border-radius:9px; text-align:center; line-height:30px; color:#fff; background:linear-gradient(135deg,#073563,#0a4a79); font-weight:800; font-size:17px; }
+.choice-icon { display:grid; width:30px; height:30px; margin-bottom:10px; border-radius:9px; place-items:center; color:#fff; background:linear-gradient(135deg,#073563,#0a4a79); }
+.choice-icon svg { width:17px; height:17px; display:block; }
 .quick-choice.emphasis { border-color:#159bab; background:#f1fbfc; }
 .consultation-choice { border-color:#92b8cf; background:#f8fbfd; }
 .quick-choice strong,.quick-choice small { display:block; }
