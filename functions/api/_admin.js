@@ -17,7 +17,9 @@ export function json(body, status = 200, extraHeaders = {}) {
 
 export function originAllowed(request) {
   const origin = request.headers.get("Origin");
-  return origin === ORIGIN;
+  // Same-origin navigations can omit Origin when the page uses no-referrer.
+  // Cross-site requests cannot carry the Strict administrator-session cookie.
+  return !origin || origin === ORIGIN;
 }
 
 function base64Url(bytes) {
