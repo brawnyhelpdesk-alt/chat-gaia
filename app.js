@@ -49,9 +49,10 @@
         window.zE("messenger", "render", { mode: "embedded", widget: { targetElement: "#gaia-chat" } }, function (renderError) {
           if (current !== attempt) return;
           if (renderError) { fail(current, "No pudimos abrir GAIA. Intenta de nuevo."); return; }
-          window.zE("messenger:ui", "newConversation", { displayName: "Solicitud con GAIA", metadata: { source: "gaia_web", request_type: requestType, platform: selectedChoice }, message: { content: { type: "text", text: initialMessage } } }, function (conversationError) {
+          window.zE("messenger", "newConversation", { displayName: "Solicitud con GAIA", metadata: { source: "gaia_web", request_type: requestType, platform: selectedChoice }, message: { content: { type: "text", text: initialMessage }, metadata: { source: "gaia_web", request_type: requestType, platform: selectedChoice } } }, function (conversationError, conversation) {
             if (current !== attempt) return;
             if (conversationError) { fail(current, "No pudimos iniciar tu nueva solicitud. Intenta de nuevo."); return; }
+            window.zE("messenger:ui", "navigation", { screen: "Conversation", options: { conversationId: conversation.id } });
             clearTimeout(timeout); input.value = ""; button.disabled = false; message("Tu nueva solicitud fue enviada a GAIA.");
           });
         });
