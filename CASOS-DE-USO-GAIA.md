@@ -17,7 +17,7 @@
 | Reporte de falla | Reportar una falla | Internet, IGC, impresora, Office 365, Dynamics, Telynet, antivirus u otro | Plataforma/equipo, sede o ubicación, mensaje de error, desde cuándo y si afecta a más personas | Internet Falla; IGC Falla; impresora Reporte de Falla; Office 365 Falla; Dynamics Falla; Telynet Falla; App Somos Corripio Falla; CPU y Hand Held Reporte de Falla; Zendesk Falla; Base de Datos Falla; Flota averiada |
 | Configuración y actualización | Configuración | Office 365, antivirus, impresora, equipo, Zendesk, flotas u otra plataforma | Plataforma o equipo, configuración solicitada, ubicación y detalle del cambio | Office 365 Configuración/Actualización/Firma/Licencia/Permisos a buzón/Acceso desde otro país; Antivirus Configuración/Actualización; impresora Configuración; Zendesk Configuración/Actualización; Flotas Configuración; Carpetas compartidas Configuración; Intranet Actualización; App Somos Corripio Actualización; Dynamics Configuración/Actualización |
 | Equipo o dispositivo | Equipo o dispositivo | Laptop nueva, cambio, impresora, Hand Held, CPU o falla | Tipo de equipo, sede, usuario asignado, motivo y condición del equipo actual | Laptop Asignación; Solicitud de equipos Cambio; impresora Configuración/Falla; Hand Held Configuración/Falla; CPU Configuración/Falla; Asignación de equipo |
-| Sistema o plataforma | Sistema o plataforma | IGC, Dynamics, Telynet, App Corripio, Base de Datos, Zendesk o sistema diverso | Sistema, necesidad concreta, impacto, datos no sensibles para reproducir el caso | IGC Requerimiento/Asesoría; Dynamics Requerimiento/Consulta; Telynet Carga Inicial/Consulta; Base de Datos Alterar objeto tabla/Mantenimiento de datos; sistemas varios otros; requerimiento TI |
+| Sistema o plataforma | Sistema o plataforma | IGC, Dynamics, Telynet, App Corripio, Base de Datos o Zendesk | Sistema, necesidad concreta, impacto, datos no sensibles para reproducir el caso | IGC Requerimiento/Asesoría; Dynamics Requerimiento/Consulta; Telynet Carga Inicial/Consulta; Base de Datos Alterar objeto tabla/Mantenimiento de datos; requerimiento TI |
 
 ## Catálogo de casos que deben crearse en Zendesk AI Agent
 
@@ -39,7 +39,6 @@ Crear un caso por cada fila usando el título exactamente como aparece. Todos de
 | TI - Telynet - Carga inicial | El usuario requiere carga inicial o activación de Telynet. |
 | TI - Microsoft Office 365 - Falla | El usuario reporta una falla de Microsoft 365. |
 | TI - Flotas - Recarga de data | El usuario solicita recarga de data para flotas. |
-| TI - Sistemas varios - Otros | El usuario tiene una solicitud tecnológica no clasificada. |
 | TI - App Somos Corripio - Solicitud de acceso | El usuario solicita acceso a App Somos Corripio. |
 | TI - IGC - Asignar permisos | El usuario necesita permisos específicos en IGC. |
 | TI - Laptop - Asignación | El usuario solicita asignación de una laptop. |

@@ -15,7 +15,7 @@
     failure: { title: "¿Dónde ocurre la falla?", choices: ["Internet", "IGC", "Impresora", "Microsoft Office 365", "Microsoft Dynamics", "Telynet", "Antivirus", "Otro sistema o equipo"] },
     configuration: { title: "¿Qué necesitas configurar?", choices: ["Microsoft Office 365", "Antivirus", "Impresora", "Equipo de trabajo", "Zendesk", "Flotas", "Otra plataforma"] },
     equipment: { title: "¿Qué equipo o dispositivo necesitas?", choices: ["Laptop nueva", "Cambio de equipo", "Impresora", "Hand Held", "CPU", "Reporte de falla de equipo"] },
-    system: { title: "¿Sobre qué sistema es tu solicitud?", choices: ["IGC", "Microsoft Dynamics", "Telynet", "App Corripio", "Base de Datos", "Zendesk", "Sistema diverso"] }
+    system: { title: "¿Sobre qué sistema es tu solicitud?", choices: ["IGC", "Microsoft Dynamics", "Telynet", "App Corripio", "Base de Datos", "Zendesk"] }
   };
   const flowLabels = { password: "Cambio de contraseña", access: "Solicitud de acceso", failure: "Reporte de falla", configuration: "Configuración", equipment: "Equipo o dispositivo", system: "Sistema o plataforma" };
   const form = document.getElementById("identificacion"), input = document.getElementById("cedula"), fields = document.getElementById("datos-cedula"), button = document.getElementById("continuar"), notice = document.getElementById("aviso"), panel = document.getElementById("chat-panel"), requestPanel = document.getElementById("request-panel"), detailPanel = document.getElementById("detail-panel"), confirmPanel = document.getElementById("confirm-panel"), detailTitle = document.getElementById("detalle-titulo"), detailChoices = document.getElementById("detail-choices"), selectionSummary = document.getElementById("selection-summary");
