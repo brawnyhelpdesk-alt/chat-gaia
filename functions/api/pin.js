@@ -1,7 +1,6 @@
 const encoder = new TextEncoder();
 const ORIGIN = "https://gaia-ascendis.pages.dev";
 const PIN_PATTERN = /^[0-9]{4}$/;
-const ITERATIONS = 150000;
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store, max-age=0", "Pragma": "no-cache", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer" } });
@@ -27,9 +26,10 @@ function fromBase64Url(value) {
 async function digest(value) { return new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(value))); }
 async function recordKey(prefix, value) { return `${prefix}:${base64Url((await digest(value)).slice(0, 18))}`; }
 
-async function hashPin(pin, salt) {
-  const key = await crypto.subtle.importKey("raw", encoder.encode(pin), "PBKDF2", false, ["deriveBits"]);
-  return new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: ITERATIONS }, key, 256));
+async function hashPin(pin, salt, secret) {
+  if (typeof secret !== "string" || secret.length < 16) throw new Error("pin_secret_unavailable");
+  const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(`${base64Url(salt)}:${pin}`)));
 }
 
 function sameBytes(left, right) {
@@ -62,7 +62,7 @@ export async function verifyPin(request, env, cedula, pin) {
   const saved = await env.GAIA_OPTIONS.get(key, "json");
   const salt = fromBase64Url(saved?.salt), expected = fromBase64Url(saved?.hash);
   if (!salt || !expected || saved?.v !== 1) return { ok: false, status: 401, error: "pin_not_set" };
-  const actual = await hashPin(pin, salt);
+  const actual = await hashPin(pin, salt, env.GAIA_ADMIN_SIGNING_KEY);
   if (!sameBytes(actual, expected)) return { ok: false, status: await failedAttempt(limiter, env) ? 429 : 401, error: "invalid_pin" };
   await env.GAIA_OPTIONS.delete(limiter.key);
   return { ok: true };
@@ -81,7 +81,8 @@ export async function onRequestPost({ request, env }) {
   if (body?.action !== "enroll" || !PIN_PATTERN.test(body?.pin || "")) return json({ error: "invalid_request" }, 400);
   if (await env.GAIA_OPTIONS.get(key)) return json({ error: "already_enrolled" }, 409);
   const salt = crypto.getRandomValues(new Uint8Array(16));
-  const hash = await hashPin(body.pin, salt);
+  let hash;
+  try { hash = await hashPin(body.pin, salt, env.GAIA_ADMIN_SIGNING_KEY); } catch { return json({ error: "service_unavailable" }, 503); }
   await env.GAIA_OPTIONS.put(key, JSON.stringify({ v: 1, salt: base64Url(salt), hash: base64Url(hash), createdAt: new Date().toISOString() }));
   return json({ enrolled: true }, 201);
 }
