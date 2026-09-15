@@ -1,5 +1,6 @@
 const encoder = new TextEncoder();
 const PRODUCTION_ORIGIN = "https://gaia-ascendis.pages.dev";
+import { verifyPin } from "./pin.js";
 
 function json(body, status) {
   return new Response(JSON.stringify(body), {
@@ -50,7 +51,7 @@ export async function onRequestPost(context) {
     return json({ error: "invalid_request" }, 415);
   }
   const contentLength = Number(request.headers.get("Content-Length") || "0");
-  if (contentLength > 256) return json({ error: "invalid_request" }, 413);
+  if (contentLength > 512) return json({ error: "invalid_request" }, 413);
 
   let body;
   try {
@@ -60,6 +61,8 @@ export async function onRequestPost(context) {
   }
   const cedula = normalizeCedula(body?.cedula);
   if (!cedula) return json({ error: "invalid_request" }, 400);
+  const verification = await verifyPin(request, env, cedula, body?.pin);
+  if (!verification.ok) return json({ error: verification.error }, verification.status);
 
   const secret = env.ZENDESK_MESSAGING_SECRET;
   const keyId = env.ZENDESK_MESSAGING_KEY_ID;

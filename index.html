@@ -38,6 +38,15 @@
             <p class="help" id="ayuda-cedula">Puedes escribirla con o sin guiones.</p>
             <input id="cedula" name="cedula" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="000-0000000-0" maxlength="32" aria-describedby="ayuda-cedula aviso" required>
           </div>
+          <div id="datos-pin" hidden>
+            <label for="pin" id="etiqueta-pin">Tu PIN</label>
+            <p class="help" id="ayuda-pin">Ingresa tu PIN personal de 4 dígitos.</p>
+            <input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="••••" maxlength="4" aria-describedby="ayuda-pin aviso">
+            <div id="confirmacion-pin" hidden>
+              <label for="confirmar-pin">Confirma tu PIN</label>
+              <input id="confirmar-pin" name="confirmar-pin" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="••••" maxlength="4" aria-describedby="aviso">
+            </div>
+          </div>
           <button id="continuar" type="submit">Continuar con GAIA</button>
           <p class="notice" id="aviso" role="status" aria-live="polite">Cargando canal de atención…</p>
           <p class="privacy">Tu cédula se enviará junto con tu solicitud.</p>

@@ -42,6 +42,9 @@ form { padding:28px 36px 30px; }
 label { display:block; margin-bottom:8px; font-size:14px; font-weight:750; color:#294760; }
 .help { margin:0 0 15px; font-size:13px; line-height:1.45; color:var(--muted); }
 input { width:100%; height:54px; padding:0 16px; border:1px solid #a7bbc9; border-radius:11px; outline:none; color:var(--ink); font:inherit; font-size:18px; letter-spacing:.04em; transition:border-color .15s,box-shadow .15s; }
+#datos-pin { margin-top:20px; }
+#confirmacion-pin { margin-top:16px; }
+#pin,#confirmar-pin { font-size:22px; letter-spacing:.32em; text-align:center; }
 input:focus { border-color:var(--cyan); box-shadow:0 0 0 4px rgba(23,181,195,.15); }
 input[aria-invalid="true"] { border-color:#b42318; }
 button { font:inherit; cursor:pointer; }

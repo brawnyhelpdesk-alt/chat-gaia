@@ -28,6 +28,7 @@
     <section id="admin-card" class="admin-card" hidden aria-labelledby="admin-title">
       <div class="admin-heading"><div><p class="eyebrow">ADMINISTRACIÓN</p><h1 id="admin-title">Opciones disponibles</h1><p>Crea hasta diez opciones adicionales para la pantalla de solicitudes.</p></div><button id="logout" class="quiet-button" type="button">Cerrar sesión</button></div>
       <section class="icon-section" aria-labelledby="base-icons-title"><h2 id="base-icons-title">Íconos de opciones actuales</h2><p>Elige un ícono corporativo para cada opción. Se mostrará al guardar los cambios.</p><div id="base-icon-list" class="base-icon-list"></div></section>
+      <section class="icon-section" aria-labelledby="pin-title"><h2 id="pin-title">Restablecer PIN de acceso</h2><p>Úsalo si una persona olvidó su PIN. En su siguiente entrada con GAIA podrá crear uno nuevo.</p><div class="two-columns"><div><label for="pin-cedula">Cédula</label><input id="pin-cedula" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="32" placeholder="000-0000000-0"></div><div><button id="reset-pin" class="quiet-button" type="button">Restablecer PIN</button></div></div><p id="pin-notice" class="notice" role="status" aria-live="polite"></p></section>
       <div id="option-list" class="option-list" aria-live="polite"></div>
       <form id="option-form" class="option-form" novalidate>
         <h2>Nueva opción</h2>
