@@ -55,6 +55,13 @@ button:disabled { cursor:wait; opacity:.7; }
 .notice { min-height:20px; margin:15px 0 0; font-size:13px; line-height:1.5; text-align:center; color:#576f86; }
 .notice.error { color:#b42318; }
 .privacy { margin:20px 0 0; font-size:12px; line-height:1.5; text-align:center; color:#60758b; }
+.touch-keypad { margin:22px 0 0; padding:16px; border:1px solid #c9dce7; border-radius:14px; background:#f6fbfd; }
+.touch-keypad p { margin:0 0 11px; color:#476783; font-size:12px; font-weight:750; text-align:center; }
+.keypad-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.keypad-grid button { min-height:52px; margin:0; border:1px solid #aac2d1; border-radius:10px; color:var(--navy); background:#fff; font-size:20px; font-weight:750; box-shadow:none; }
+.keypad-grid button:active { background:#d9f1f4; transform:scale(.98); }
+.keypad-grid .keypad-clear,.keypad-grid .keypad-backspace { font-size:13px; }
+.technology-kiosk .card { width:min(100%,600px); }
 .noscript { margin:0; padding:0 25px 25px; color:#b42318; }
 footer { padding:18px 24px; font-size:12px; text-align:center; color:#5e758c; background:#fff; }
 .chat-panel { width:min(100%,680px); height:min(790px,calc(100dvh - 155px)); min-height:380px; display:flex; flex-direction:column; overflow:hidden; border:1px solid #d7e3eb; border-radius:20px; background:#fff; box-shadow:0 28px 64px rgba(5,41,75,.16); }

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="GAIA te orienta y canaliza tus solicitudes.">
+  <meta name="theme-color" content="#0b3157">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>GAIA Tecnología | ASCENDIS</title>
+  <link rel="icon" type="image/png" href="../assets/gaia.png">
+  <link rel="apple-touch-icon" href="../assets/gaia.png">
+  <link rel="stylesheet" href="../style.css">
+  <script src="../widget-init.js"></script>
+  <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=c60b16af-3696-4bb7-854d-cd1f982cea2e" defer></script>
+  <script src="../icons.js" defer></script>
+  <script src="../app.js" defer></script>
+</head>
+<body class="technology-kiosk">
+  <div class="shell">
+    <header class="site-header">
+      <div class="brand">
+        <img class="brand-avatar" src="../assets/gaia.png" alt="" width="44" height="44">
+        <span>GAIA<small>ASCENDIS · GRUPO CORRIPIO</small></span>
+      </div>
+      <span class="channel-label">Tecnología · Atención en kiosco</span>
+    </header>
+    <main>
+      <section class="card landing" aria-labelledby="titulo">
+        <div class="card-top">
+          <img class="gaia-avatar" src="../assets/gaia.png" alt="GAIA" width="90" height="90">
+          <h1 id="titulo">¿En qué podemos ayudarte?</h1>
+          <p>GAIA te orienta y canaliza tus solicitudes.</p>
+        </div>
+        <form id="identificacion" novalidate>
+          <div id="datos-cedula">
+            <label for="cedula">Tu cédula</label>
+            <p class="help" id="ayuda-cedula">Puedes escribirla con o sin guiones.</p>
+            <input id="cedula" name="cedula" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="000-0000000-0" maxlength="32" aria-describedby="ayuda-cedula aviso" required>
+          </div>
+          <div id="datos-pin" hidden>
+            <label for="pin" id="etiqueta-pin">Tu PIN</label>
+            <p class="help" id="ayuda-pin">Ingresa tu PIN personal de 4 dígitos.</p>
+            <input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="••••" maxlength="4" aria-describedby="ayuda-pin aviso">
+            <div id="confirmacion-pin" hidden>
+              <label for="confirmar-pin">Confirma tu PIN</label>
+              <input id="confirmar-pin" name="confirmar-pin" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="••••" maxlength="4" aria-describedby="aviso">
+            </div>
+          </div>
+          <button id="continuar" type="submit">Continuar con GAIA</button>
+          <p class="notice" id="aviso" role="status" aria-live="polite">Cargando canal de atención…</p>
+          <p class="privacy">Tu cédula se enviará junto con tu solicitud.</p>
+          <section id="touch-keypad" class="touch-keypad" aria-label="Teclado numérico táctil">
+            <p>Teclado numérico</p>
+            <div class="keypad-grid">
+              <button type="button" data-keypad-key="1">1</button><button type="button" data-keypad-key="2">2</button><button type="button" data-keypad-key="3">3</button>
+              <button type="button" data-keypad-key="4">4</button><button type="button" data-keypad-key="5">5</button><button type="button" data-keypad-key="6">6</button>
+              <button type="button" data-keypad-key="7">7</button><button type="button" data-keypad-key="8">8</button><button type="button" data-keypad-key="9">9</button>
+              <button type="button" class="keypad-clear" data-keypad-key="clear">Borrar</button><button type="button" data-keypad-key="0">0</button><button type="button" class="keypad-backspace" data-keypad-key="backspace" aria-label="Borrar último dígito">⌫</button>
+            </div>
+          </section>
+        </form>
+        <section id="request-panel" class="request-panel" hidden aria-labelledby="solicitud-titulo">
+          <h2 id="solicitud-titulo">Inicia una nueva solicitud</h2>
+          <p class="request-intro">Selecciona una opción para que GAIA te guíe paso a paso.</p>
+          <div class="quick-grid" aria-label="Solicitudes frecuentes">
+            <button class="quick-choice emphasis" type="button" data-flow="password" data-option-key="password"><span class="choice-icon" aria-hidden="true"></span><strong>Olvidé mi contraseña</strong><small>Restablecer acceso</small></button>
+            <button class="quick-choice" type="button" data-flow="access" data-option-key="access"><span class="choice-icon" aria-hidden="true"></span><strong>Necesito acceso</strong><small>Aplicación, carpeta o internet</small></button>
+            <button class="quick-choice" type="button" data-flow="failure" data-option-key="failure"><span class="choice-icon" aria-hidden="true"></span><strong>Reportar una falla</strong><small>Internet, sistema o equipo</small></button>
+            <button class="quick-choice" type="button" data-flow="configuration" data-option-key="configuration"><span class="choice-icon" aria-hidden="true"></span><strong>Configuración</strong><small>Equipo, Office o antivirus</small></button>
+            <button class="quick-choice" type="button" data-flow="equipment" data-option-key="equipment"><span class="choice-icon" aria-hidden="true"></span><strong>Equipo o dispositivo</strong><small>Solicitud, cambio o impresora</small></button>
+            <button class="quick-choice" type="button" data-flow="system" data-option-key="system"><span class="choice-icon" aria-hidden="true"></span><strong>Sistema o plataforma</strong><small>IGC, Dynamics, Telynet y más</small></button>
+            <button class="quick-choice consultation-choice" type="button" id="hacer-consulta" data-option-key="consultation"><span class="choice-icon" aria-hidden="true"></span><strong>Hacer consulta</strong><small>Pregunta lo que necesites a GAIA</small></button>
+            <div id="custom-options" class="custom-options" aria-live="polite"></div>
+          </div>
+          <button id="mis-conversaciones" class="secondary-button" type="button">Ver mis conversaciones</button>
+        </section>
+        <section id="detail-panel" class="request-panel" hidden aria-labelledby="detalle-titulo">
+          <button id="volver-solicitudes" class="text-button" type="button">← Volver a solicitudes</button>
+          <h2 id="detalle-titulo">¿Sobre qué plataforma?</h2>
+          <p id="detalle-ayuda" class="request-intro">Elige la opción que mejor describe tu caso.</p>
+          <div id="detail-choices" class="detail-choices"></div>
+        </section>
+        <section id="confirm-panel" class="request-panel" hidden aria-labelledby="confirmacion-titulo">
+          <button id="cambiar-solicitud" class="text-button" type="button">← Cambiar solicitud</button>
+          <p class="eyebrow">NUEVA SOLICITUD</p>
+          <h2 id="confirmacion-titulo">Confirmar solicitud</h2>
+          <p id="selection-summary" class="selection-summary"></p>
+          <p class="request-intro">GAIA recopilará los datos necesarios y te conectará con el equipo responsable.</p>
+          <button id="abrir-solicitud" class="primary-button" type="button">Continuar con GAIA</button>
+        </section>
+        <noscript><p class="noscript">Activa JavaScript en tu navegador para usar GAIA.</p></noscript>
+      </section>
+      <section class="chat-panel" id="chat-panel" aria-label="Chat con GAIA" hidden>
+        <div class="chat-tools"><span>Tu conversación con GAIA</span><div class="chat-actions"><button id="volver" class="back-button" type="button">Volver</button><button id="cerrar-sesion" class="end-session-button" type="button">Cerrar sesión</button></div></div>
+        <div id="gaia-chat"></div>
+      </section>
+    </main>
+    <footer>ASCENDIS · Servicios corporativos para Grupo Corripio</footer>
+  </div>
+</body>
+</html>
+
