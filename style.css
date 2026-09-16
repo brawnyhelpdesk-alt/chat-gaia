@@ -66,6 +66,13 @@ button:disabled { cursor:wait; opacity:.7; }
 .technology-kiosk .touch-keypad { position:fixed; right:50%; bottom:0; z-index:20; width:min(calc(100vw - 24px),460px); margin:0; padding:12px 16px max(16px,env(safe-area-inset-bottom)); border-radius:16px 16px 0 0; transform:translateX(50%); box-shadow:0 -10px 32px rgba(5,41,75,.2); }
 .technology-kiosk.keypad-open main { align-items:start; padding-top:16px; padding-bottom:286px; }
 .technology-kiosk.keypad-open .card { margin:0 auto; }
+.technology-kiosk.keypad-open .card-top { display:grid; grid-template-columns:62px 1fr; column-gap:14px; align-items:center; padding:14px 28px; }
+.technology-kiosk.keypad-open .gaia-avatar { grid-row:span 2; width:62px; height:62px; margin:0; }
+.technology-kiosk.keypad-open .card-top h1 { margin:0 0 3px; font-size:22px; }
+.technology-kiosk.keypad-open .card-top p { font-size:13px; }
+.technology-kiosk.keypad-open form { padding:20px 36px 26px; }
+.technology-kiosk.keypad-open .keypad-grid button { min-height:46px; }
+.technology-kiosk.keypad-open .keypad-grid .keypad-enter { min-height:42px; }
 .kiosk-scroll-next { position:fixed; right:22px; bottom:20px; z-index:15; display:grid; width:46px; height:46px; padding:0; border:1px solid #444; border-radius:50%; place-items:center; color:#fff; background:#202020; box-shadow:0 8px 22px rgba(0,0,0,.28); font-size:30px; font-weight:300; line-height:1; }.technology-kiosk.keypad-open .kiosk-scroll-next { display:none; }
 .noscript { margin:0; padding:0 25px 25px; color:#b42318; }
 footer { padding:18px 24px; font-size:12px; text-align:center; color:#5e758c; background:#fff; }
