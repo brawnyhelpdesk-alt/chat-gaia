@@ -32,6 +32,7 @@ form { padding:28px 36px 30px; }
 .quick-choice strong { font-size:14px; line-height:1.25; }
 .quick-choice small { margin-top:5px; color:var(--muted); font-size:11px; line-height:1.35; }
 .secondary-button,.primary-button { width:100%; min-height:50px; margin-top:18px; padding:10px; border:1px solid #aec4d3; border-radius:10px; color:var(--navy); background:#fff; font-weight:750; }
+.catalog-logout-button { width:100%; min-height:44px; margin-top:10px; padding:9px; border:1px solid #d7b9b5; border-radius:10px; color:#8a281e; background:#fff; font-weight:750; }
 .primary-button { border:0; color:#fff; background:var(--cyan); box-shadow:0 9px 20px rgba(0,127,140,.2); }
 .text-button { margin:0 0 18px; padding:0; border:0; color:#076f7d; background:transparent; font-size:13px; font-weight:700; }
 .detail-choices { display:grid; gap:9px; }
