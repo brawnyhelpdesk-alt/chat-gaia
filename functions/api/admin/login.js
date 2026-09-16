@@ -12,7 +12,7 @@ async function rateLimit(request, env) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!originAllowed(request) || !env.GAIA_OPTIONS || !env.GAIA_ADMIN_PASSWORD || !env.GAIA_ADMIN_SIGNING_KEY) return json({ error: "unavailable" }, 503);
+  if (!originAllowed(request) || !env.GAIA_OPTIONS || !env.GAIA_ADMIN_SIGNING_KEY) return json({ error: "unavailable" }, 503);
   if (!request.headers.get("Content-Type")?.toLowerCase().startsWith("application/json") || Number(request.headers.get("Content-Length") || "0") > 512) return json({ error: "invalid_request" }, 400);
   const limiter = await rateLimit(request, env);
   if (limiter.blocked) return json({ error: "rate_limited" }, 429);

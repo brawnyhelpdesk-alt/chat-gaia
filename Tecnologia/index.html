@@ -10,12 +10,14 @@
   <title>GAIA Tecnología | ASCENDIS</title>
   <link rel="icon" type="image/png" href="../assets/gaia.png">
   <link rel="apple-touch-icon" href="../assets/gaia.png">
+  <link rel="manifest" href="../manifest.webmanifest">
   <link rel="stylesheet" href="../style.css">
   <script src="../widget-init.js"></script>
   <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=c60b16af-3696-4bb7-854d-cd1f982cea2e" defer></script>
   <script src="../icons.js" defer></script>
   <script src="kiosk.js" defer></script>
   <script src="../app.js" defer></script>
+  <script src="../pwa.js" defer></script>
 </head>
 <body class="technology-kiosk">
   <div class="shell">
@@ -102,6 +104,7 @@
     <footer>ASCENDIS · Servicios corporativos para Grupo Corripio</footer>
   </div>
   <button id="kiosk-scroll-next" class="kiosk-scroll-next" type="button" aria-label="Ver más servicios">↓</button>
+  <aside id="install-app" class="install-app" hidden aria-live="polite"><img src="../assets/gaia.png" alt=""><div><strong>Instala GAIA</strong><p data-install-text>Agrega GAIA como acceso directo en este equipo.</p></div><button id="install-app-button" type="button">Instalar</button><button id="install-app-close" type="button" aria-label="Cerrar aviso">×</button></aside>
 </body>
 </html>
 

@@ -41,6 +41,10 @@ async function hmac(value, secret) {
   return new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(value)));
 }
 
+async function passwordHash(value, salt, secret) {
+  return hmac(`gaia-admin-password:${salt}:${value}`, secret);
+}
+
 async function sameSecret(value, expected) {
   const [left, right] = await Promise.all([
     crypto.subtle.digest("SHA-256", encoder.encode(value)),
@@ -82,7 +86,25 @@ export async function authenticated(request, env) {
 }
 
 export async function verifyPassword(value, env) {
-  return typeof value === "string" && value.length >= 16 && value.length <= 200 && typeof env.GAIA_ADMIN_PASSWORD === "string" && env.GAIA_ADMIN_PASSWORD.length >= 16 && sameSecret(value, env.GAIA_ADMIN_PASSWORD);
+  if (typeof value !== "string" || value.length < 16 || value.length > 200 || !env.GAIA_OPTIONS || !env.GAIA_ADMIN_SIGNING_KEY) return false;
+  const saved = await env.GAIA_OPTIONS.get("gaia-admin-password", "json");
+  if (saved?.v === 1 && typeof saved.salt === "string" && typeof saved.hash === "string") {
+    const actual = base64Url(await passwordHash(value, saved.salt, env.GAIA_ADMIN_SIGNING_KEY));
+    return sameSecret(actual, saved.hash);
+  }
+  return typeof env.GAIA_ADMIN_PASSWORD === "string" && env.GAIA_ADMIN_PASSWORD.length >= 16 && sameSecret(value, env.GAIA_ADMIN_PASSWORD);
+}
+
+export function secureAdminPassword(value) {
+  return typeof value === "string" && value.length >= 16 && value.length <= 200 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value);
+}
+
+export async function setAdminPassword(env, value) {
+  if (!env.GAIA_OPTIONS || !env.GAIA_ADMIN_SIGNING_KEY || !secureAdminPassword(value)) return false;
+  const salt = base64Url(crypto.getRandomValues(new Uint8Array(18)));
+  const hash = base64Url(await passwordHash(value, salt, env.GAIA_ADMIN_SIGNING_KEY));
+  await env.GAIA_OPTIONS.put("gaia-admin-password", JSON.stringify({ v: 1, salt, hash, updatedAt: new Date().toISOString() }));
+  return true;
 }
 
 export function cookie(value) {

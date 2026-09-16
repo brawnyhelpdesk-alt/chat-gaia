@@ -1,0 +1,14 @@
+{
+  "name": "GAIA · ASCENDIS",
+  "short_name": "GAIA",
+  "description": "Canal corporativo de atención de ASCENDIS.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#edf4f8",
+  "theme_color": "#073563",
+  "icons": [
+    { "src": "/assets/gaia.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/assets/gaia.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
