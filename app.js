@@ -21,6 +21,7 @@
   const defaultIcons = { password: "key", access: "access", failure: "alert", configuration: "settings", equipment: "laptop", system: "system", consultation: "consultation" };
   const form = document.getElementById("identificacion"), input = document.getElementById("cedula"), fields = document.getElementById("datos-cedula"), pinFields = document.getElementById("datos-pin"), pinInput = document.getElementById("pin"), pinConfirm = document.getElementById("confirmar-pin"), pinConfirmBox = document.getElementById("confirmacion-pin"), pinLabel = document.getElementById("etiqueta-pin"), pinHelp = document.getElementById("ayuda-pin"), button = document.getElementById("continuar"), notice = document.getElementById("aviso"), panel = document.getElementById("chat-panel"), requestPanel = document.getElementById("request-panel"), detailPanel = document.getElementById("detail-panel"), confirmPanel = document.getElementById("confirm-panel"), detailTitle = document.getElementById("detalle-titulo"), detailChoices = document.getElementById("detail-choices"), selectionSummary = document.getElementById("selection-summary"), customOptions = document.getElementById("custom-options");
   const touchKeypad = document.getElementById("touch-keypad");
+  const showKeypadButton = document.getElementById("mostrar-teclado"), hideKeypadButton = document.getElementById("ocultar-teclado");
   let keypadTarget = input;
   let widgetAvailable = false, authenticated = false, currentCedula = "", selectedFlow = "", selectedChoice = "", pinMode = "cedula", attempt = 0, timeout, inactivityTimer, awaitingReply = false;
   function message(text, error) { notice.textContent = text; notice.className = error ? "notice error" : "notice"; }
@@ -33,6 +34,8 @@
   }
   function hideRequestPanels() { requestPanel.hidden = detailPanel.hidden = confirmPanel.hidden = true; }
   function activateKeypad(target) { if (!touchKeypad || !target) return; keypadTarget = target; }
+  function showKeypad(target) { activateKeypad(target); if (!touchKeypad) return; touchKeypad.hidden = false; if (showKeypadButton) showKeypadButton.setAttribute("aria-expanded", "true"); }
+  function hideKeypad() { if (!touchKeypad) return; touchKeypad.hidden = true; if (showKeypadButton) showKeypadButton.setAttribute("aria-expanded", "false"); }
   function showLanding() { document.body.classList.remove("chat-active"); panel.hidden = true; if (authenticated) { form.hidden = true; hideRequestPanels(); requestPanel.hidden = false; return; } form.hidden = false; fields.hidden = pinMode !== "cedula"; pinFields.hidden = pinMode === "cedula"; pinConfirmBox.hidden = pinMode !== "enroll"; hideRequestPanels(); button.disabled = false; button.textContent = pinMode === "enroll" ? "Crear PIN y continuar" : pinMode === "verify" ? "Ingresar a GAIA" : "Continuar con GAIA"; activateKeypad(pinMode === "cedula" ? input : pinInput); }
   function showChat() { panel.hidden = false; document.body.classList.add("chat-active"); }
   function fail(current, text) { if (current !== attempt) return; attempt += 1; clearTimeout(timeout); showLanding(); message(text, true); }
@@ -142,7 +145,9 @@
   let checks = 0; const waiting = setInterval(function () { try { if (connectWidget()) clearInterval(waiting); else if (++checks >= 50) { clearInterval(waiting); message("No pudimos cargar GAIA. Actualiza la página e intenta de nuevo.", true); } } catch { clearInterval(waiting); message("No pudimos cargar GAIA. Actualiza la página e intenta de nuevo.", true); } }, 300);
   input.addEventListener("input", function () { input.removeAttribute("aria-invalid"); });
   [pinInput, pinConfirm].forEach(function (element) { element.addEventListener("input", function () { element.removeAttribute("aria-invalid"); }); });
-  [input, pinInput, pinConfirm].forEach(function (element) { element.addEventListener("focus", function () { activateKeypad(element); }); });
+  [input, pinInput, pinConfirm].forEach(function (element) { element.addEventListener("focus", function () { showKeypad(element); }); });
+  if (showKeypadButton) showKeypadButton.addEventListener("click", function () { showKeypad(pinMode === "cedula" ? input : pinInput); (pinMode === "cedula" ? input : pinInput).focus({ preventScroll: true }); });
+  if (hideKeypadButton) hideKeypadButton.addEventListener("click", hideKeypad);
   if (touchKeypad) touchKeypad.querySelectorAll("[data-keypad-key]").forEach(function (key) { key.addEventListener("click", function () { const value = key.dataset.keypadKey; if (!keypadTarget) return; if (value === "clear") keypadTarget.value = ""; else if (value === "backspace") keypadTarget.value = keypadTarget.value.slice(0, -1); else if (keypadTarget.value.length < Number(keypadTarget.maxLength || 99)) keypadTarget.value += value; keypadTarget.dispatchEvent(new Event("input", { bubbles: true })); keypadTarget.focus({ preventScroll: true }); }); });
   document.querySelectorAll("[data-flow]").forEach(function (choice) { choice.addEventListener("click", function () { showFlow(choice.dataset.flow); }); });
   document.getElementById("hacer-consulta").addEventListener("click", startConsultation);

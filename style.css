@@ -50,13 +50,15 @@ input[aria-invalid="true"] { border-color:#b42318; }
 button { font:inherit; cursor:pointer; }
 #continuar { width:100%; min-height:52px; margin-top:18px; padding:12px; border:0; border-radius:11px; background:var(--cyan); color:#fff; font-weight:750; box-shadow:0 9px 20px rgba(0,127,140,.2); transition:background .15s; }
 #continuar:hover { background:#006d79; }
+.show-keypad-button { width:100%; min-height:46px; margin-top:18px; padding:10px; border:1px solid #aec4d3; border-radius:11px; color:var(--navy); background:#fff; font-weight:750; }
+.show-keypad-button:hover { border-color:var(--cyan); background:#f4fbfc; }
 button:focus-visible { outline:3px solid #209caf; outline-offset:4px; }
 button:disabled { cursor:wait; opacity:.7; }
 .notice { min-height:20px; margin:15px 0 0; font-size:13px; line-height:1.5; text-align:center; color:#576f86; }
 .notice.error { color:#b42318; }
 .privacy { margin:20px 0 0; font-size:12px; line-height:1.5; text-align:center; color:#60758b; }
 .touch-keypad { margin:22px 0 0; padding:16px; border:1px solid #c9dce7; border-radius:14px; background:#f6fbfd; }
-.touch-keypad p { margin:0 0 11px; color:#476783; font-size:12px; font-weight:750; text-align:center; }
+.keypad-heading { display:flex; align-items:center; justify-content:space-between; margin:0 0 11px; }.touch-keypad p { margin:0; color:#476783; font-size:12px; font-weight:750; text-align:center; }.keypad-heading button { padding:2px 4px; border:0; color:#58728e; background:transparent; font-size:12px; font-weight:700; }
 .keypad-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 .keypad-grid button { min-height:52px; margin:0; border:1px solid #aac2d1; border-radius:10px; color:var(--navy); background:#fff; font-size:20px; font-weight:750; box-shadow:none; }
 .keypad-grid button:active { background:#d9f1f4; transform:scale(.98); }
