@@ -124,3 +124,10 @@ export function validIcons(value) {
   }
   return cleaned;
 }
+
+export function validKioskSettings(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const width = Number(value.width), height = Number(value.height);
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 640 || width > 3840 || height < 480 || height > 2160) return null;
+  return { width, height };
+}

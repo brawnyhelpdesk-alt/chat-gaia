@@ -9,7 +9,7 @@ body { min-height:100vh; font-family:Inter,-apple-system,BlinkMacSystemFont,"Seg
 .brand-avatar,.gaia-avatar { object-fit:cover; object-position:center 19%; border-radius:50%; background:#d4ecf3; }
 .brand-avatar { width:46px; height:46px; border:2px solid #e2eff4; }
 .brand small { display:block; margin-top:3px; font-size:10px; font-weight:750; letter-spacing:.11em; color:#58728e; }
-.channel-label { padding:7px 11px; border:1px solid #d8e5ec; border-radius:999px; font-size:12px; font-weight:650; color:#466884; background:#f8fbfd; }
+.channel-label { padding:7px 11px; border:1px solid #d8e5ec; border-radius:999px; font-size:12px; font-weight:650; color:#466884; background:#f8fbfd; }.channel-label small { margin-left:7px; padding-left:7px; border-left:1px solid #d8e5ec; font-size:10px; font-weight:700; color:#678197; }
 main { display:grid; place-items:center; padding:42px 22px; background:radial-gradient(circle at 10% 12%,rgba(32,168,184,.17),transparent 25rem),radial-gradient(circle at 90% 90%,rgba(7,53,99,.11),transparent 27rem),linear-gradient(135deg,#eff7fa,#dcecf3); }
 .card { width:min(100%,548px); overflow:hidden; border:1px solid #d7e3eb; border-radius:24px; background:#fff; box-shadow:0 28px 64px rgba(5,41,75,.16); }
 .card-top { padding:31px 38px 32px; color:#fff; background:linear-gradient(135deg,#05294b 0%,#073563 60%,#0a4a79 100%); }
@@ -61,7 +61,7 @@ button:disabled { cursor:wait; opacity:.7; }
 .keypad-grid button { min-height:52px; margin:0; border:1px solid #aac2d1; border-radius:10px; color:var(--navy); background:#fff; font-size:20px; font-weight:750; box-shadow:none; }
 .keypad-grid button:active { background:#d9f1f4; transform:scale(.98); }
 .keypad-grid .keypad-clear,.keypad-grid .keypad-backspace { font-size:13px; }
-.technology-kiosk .card { width:min(100%,600px); }
+.technology-kiosk .card { width:min(100%,min(600px,calc(var(--kiosk-width, 1024) * .586px))); }.technology-kiosk main { padding:min(42px,calc(var(--kiosk-height, 768) * .055px)) 22px; }
 .noscript { margin:0; padding:0 25px 25px; color:#b42318; }
 footer { padding:18px 24px; font-size:12px; text-align:center; color:#5e758c; background:#fff; }
 .chat-panel { width:min(100%,680px); height:min(790px,calc(100dvh - 155px)); min-height:380px; display:flex; flex-direction:column; overflow:hidden; border:1px solid #d7e3eb; border-radius:20px; background:#fff; box-shadow:0 28px 64px rgba(5,41,75,.16); }
