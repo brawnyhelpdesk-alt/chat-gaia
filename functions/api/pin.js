@@ -1,5 +1,6 @@
+import { existingZendeskUser } from "./_zendesk.js";
 const encoder = new TextEncoder();
-const ORIGIN = "https://gaia-ascendis.pages.dev";
+const ORIGINS = new Set(["https://gaia-ascendis.pages.dev", "https://gaia.corripio.com.do"]);
 const PIN_PATTERN = /^[0-9]{4}$/;
 
 function json(body, status = 200) {
@@ -70,15 +71,21 @@ export async function verifyPin(request, env, cedula, pin) {
 
 export async function onRequestPost({ request, env }) {
   const origin = request.headers.get("Origin");
-  if (origin && origin !== ORIGIN) return json({ error: "forbidden" }, 403);
+  if (origin && !ORIGINS.has(origin)) return json({ error: "forbidden" }, 403);
   if (!env.GAIA_OPTIONS || !request.headers.get("Content-Type")?.toLowerCase().startsWith("application/json") || Number(request.headers.get("Content-Length") || "0") > 512) return json({ error: "invalid_request" }, 400);
   let body;
   try { body = await request.json(); } catch { return json({ error: "invalid_request" }, 400); }
   const cedula = normalizeCedula(body?.cedula);
   if (!cedula) return json({ error: "invalid_request" }, 400);
   const key = await recordKey("gaia-pin", cedula);
-  if (body?.action === "status") return json({ enrolled: Boolean(await env.GAIA_OPTIONS.get(key)) });
+  if (body?.action === "status") {
+    const user = await existingZendeskUser(env, cedula);
+    if (!user.ok) return json({ error: user.error }, user.error === "user_not_found" ? 404 : 503);
+    return json({ enrolled: Boolean(await env.GAIA_OPTIONS.get(key)) });
+  }
   if (body?.action !== "enroll" || !PIN_PATTERN.test(body?.pin || "")) return json({ error: "invalid_request" }, 400);
+  const user = await existingZendeskUser(env, cedula);
+  if (!user.ok) return json({ error: user.error }, user.error === "user_not_found" ? 404 : 503);
   if (await env.GAIA_OPTIONS.get(key)) return json({ error: "already_enrolled" }, 409);
   const salt = crypto.getRandomValues(new Uint8Array(16));
   let hash;

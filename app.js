@@ -159,7 +159,7 @@
       const cedula = normalizeCedula(input.value);
       if (!cedula) { input.setAttribute("aria-invalid", "true"); message("Ingresa los 11 dígitos de tu cédula, con o sin guiones. No incluyas letras.", true); input.focus(); return; }
       button.disabled = true; message("Verificando tu acceso…");
-      try { const status = await pinRequest({ action: "status", cedula: cedula }); currentCedula = cedula; pinMode = status.enrolled ? "verify" : "enroll"; pinLabel.textContent = pinMode === "enroll" ? "Crea tu PIN personal" : "Tu PIN"; pinHelp.textContent = pinMode === "enroll" ? "Será tu clave personal de 4 dígitos para entrar a GAIA." : "Ingresa tu PIN personal de 4 dígitos."; showLanding(); pinInput.focus(); message(""); } catch { button.disabled = false; message("No pudimos verificar tu acceso. Intenta de nuevo.", true); }
+      try { const status = await pinRequest({ action: "status", cedula: cedula }); currentCedula = cedula; pinMode = status.enrolled ? "verify" : "enroll"; pinLabel.textContent = pinMode === "enroll" ? "Crea tu PIN personal" : "Tu PIN"; pinHelp.textContent = pinMode === "enroll" ? "Será tu clave personal de 4 dígitos para entrar a GAIA." : "Ingresa tu PIN personal de 4 dígitos."; showLanding(); pinInput.focus(); message(""); } catch (error) { button.disabled = false; message(error.code === "user_not_found" ? "No encontramos una cuenta corporativa con esa cédula. Verifica el número o contacta a Tecnología." : "No pudimos verificar tu acceso. Intenta de nuevo.", true); }
       return;
     }
     const pin = pinInput.value;

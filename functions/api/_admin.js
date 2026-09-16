@@ -1,5 +1,5 @@
 const encoder = new TextEncoder();
-const ORIGIN = "https://gaia-ascendis.pages.dev";
+const ORIGINS = new Set(["https://gaia-ascendis.pages.dev", "https://gaia.corripio.com.do"]);
 
 export function json(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
@@ -19,7 +19,7 @@ export function originAllowed(request) {
   const origin = request.headers.get("Origin");
   // Same-origin navigations can omit Origin when the page uses no-referrer.
   // Cross-site requests cannot carry the Strict administrator-session cookie.
-  return !origin || origin === ORIGIN;
+  return !origin || ORIGINS.has(origin);
 }
 
 function base64Url(bytes) {

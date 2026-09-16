@@ -1,6 +1,7 @@
 const encoder = new TextEncoder();
-const PRODUCTION_ORIGIN = "https://gaia-ascendis.pages.dev";
+const ORIGINS = new Set(["https://gaia-ascendis.pages.dev", "https://gaia.corripio.com.do"]);
 import { verifyPin } from "./pin.js";
+import { existingZendeskUser } from "./_zendesk.js";
 
 function json(body, status) {
   return new Response(JSON.stringify(body), {
@@ -46,7 +47,7 @@ async function signJwt(payload, keyId, secret) {
 export async function onRequestPost(context) {
   const { request, env } = context;
   const origin = request.headers.get("Origin");
-  if (origin && origin !== PRODUCTION_ORIGIN) return json({ error: "forbidden" }, 403);
+  if (origin && !ORIGINS.has(origin)) return json({ error: "forbidden" }, 403);
   if (!request.headers.get("Content-Type")?.toLowerCase().startsWith("application/json")) {
     return json({ error: "invalid_request" }, 415);
   }
@@ -63,6 +64,8 @@ export async function onRequestPost(context) {
   if (!cedula) return json({ error: "invalid_request" }, 400);
   const verification = await verifyPin(request, env, cedula, body?.pin);
   if (!verification.ok) return json({ error: verification.error }, verification.status);
+  const user = await existingZendeskUser(env, cedula);
+  if (!user.ok) return json({ error: user.error }, user.error === "user_not_found" ? 404 : 503);
 
   const secret = env.ZENDESK_MESSAGING_SECRET;
   const keyId = env.ZENDESK_MESSAGING_KEY_ID;
