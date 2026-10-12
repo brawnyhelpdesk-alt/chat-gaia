@@ -258,10 +258,14 @@ export async function mfaStatus(env) {
   return { enabled: saved?.v === 1 && !!saved.secret };
 }
 
+function authenticatorUri(secret) {
+  return `otpauth://totp/GAIA%20Administrador?secret=${secret}&issuer=GAIA&algorithm=SHA1&digits=6&period=30`;
+}
+
 export async function beginMfa(env) {
   const secret = base32(crypto.getRandomValues(new Uint8Array(20)));
   const enrollmentToken = await seal(JSON.stringify({ v: 1, secret, exp: Math.floor(Date.now() / 1000) + 900 }), env);
-  return { secret, enrollmentToken, uri: `otpauth://totp/GAIA%20Administrador?secret=${secret}&issuer=GAIA&algorithm=SHA1&digits=6&period=30` };
+  return { secret, enrollmentToken, uri: authenticatorUri(secret) };
 }
 
 export async function enableMfa(env, code, enrollmentToken) {
@@ -288,6 +292,20 @@ export async function verifyMfa(env, code) {
   saved.usedRecoveryAt = new Date().toISOString();
   await env.GAIA_OPTIONS.put("gaia-admin-mfa", JSON.stringify(saved));
   return true;
+}
+
+export async function verifyCurrentTotp(env, code) {
+  const saved = await env.GAIA_OPTIONS.get("gaia-admin-mfa", "json");
+  if (saved?.v !== 1 || !saved.secret) return false;
+  const secret = await unseal(saved.secret, env);
+  return !!secret && await verifyTotp(secret, String(code || ""));
+}
+
+export async function currentMfaEnrollment(env) {
+  const saved = await env.GAIA_OPTIONS.get("gaia-admin-mfa", "json");
+  if (saved?.v !== 1 || !saved.secret) return null;
+  const secret = await unseal(saved.secret, env);
+  return secret ? { secret, uri: authenticatorUri(secret) } : null;
 }
 
 export async function disableMfa(env) {

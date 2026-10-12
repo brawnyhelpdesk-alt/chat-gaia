@@ -1,4 +1,4 @@
-import { authenticated, beginMfa, disableMfa, enableMfa, json, mfaStatus, originAllowed, regenerateRecoveryCodes, verifyMfa, verifyPassword } from "../_admin.js";
+import { authenticated, beginMfa, currentMfaEnrollment, disableMfa, enableMfa, json, mfaStatus, originAllowed, regenerateRecoveryCodes, verifyCurrentTotp, verifyMfa, verifyPassword } from "../_admin.js";
 
 async function permitted(request, env) {
   return originAllowed(request) && env.GAIA_OPTIONS && env.GAIA_ADMIN_SIGNING_KEY && await authenticated(request, env);
@@ -18,6 +18,11 @@ export async function onRequestPost({ request, env }) {
   if (body?.action === "enable") {
     const recoveryCodes = await enableMfa(env, body.code, body.enrollmentToken);
     return recoveryCodes ? json({ enabled: true, recoveryCodes }) : json({ error: "invalid_mfa" }, 400);
+  }
+  if (body?.action === "device") {
+    if (!await verifyPassword(body.currentPassword, env) || !await verifyCurrentTotp(env, body.code)) return json({ error: "invalid_credentials" }, 401);
+    const enrollment = await currentMfaEnrollment(env);
+    return enrollment ? json(enrollment) : json({ error: "mfa_not_enabled" }, 400);
   }
   if (body?.action === "disable") {
     if (!await verifyPassword(body.currentPassword, env) || !await verifyMfa(env, body.code)) return json({ error: "invalid_credentials" }, 401);
