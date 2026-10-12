@@ -22,7 +22,7 @@
   const form = document.getElementById("identificacion"), input = document.getElementById("cedula"), fields = document.getElementById("datos-cedula"), pinFields = document.getElementById("datos-pin"), pinInput = document.getElementById("pin"), pinConfirm = document.getElementById("confirmar-pin"), pinConfirmBox = document.getElementById("confirmacion-pin"), pinLabel = document.getElementById("etiqueta-pin"), pinHelp = document.getElementById("ayuda-pin"), button = document.getElementById("continuar"), notice = document.getElementById("aviso"), panel = document.getElementById("chat-panel"), requestPanel = document.getElementById("request-panel"), detailPanel = document.getElementById("detail-panel"), confirmPanel = document.getElementById("confirm-panel"), detailTitle = document.getElementById("detalle-titulo"), detailChoices = document.getElementById("detail-choices"), selectionSummary = document.getElementById("selection-summary"), customOptions = document.getElementById("custom-options");
   const touchKeypad = document.getElementById("touch-keypad");
   let keypadTarget = input;
-  let widgetAvailable = false, authenticated = false, currentCedula = "", selectedFlow = "", selectedChoice = "", pinMode = "cedula", attempt = 0, timeout, inactivityTimer, awaitingReply = false;
+  let widgetAvailable = false, widgetConnecting = false, authenticated = false, currentCedula = "", selectedFlow = "", selectedChoice = "", pinMode = "cedula", attempt = 0, timeout, widgetReadyTimeout, inactivityTimer, awaitingReply = false;
   let updateKioskScroll = function () {};
   function message(text, error) { notice.textContent = text; notice.className = error ? "notice error" : "notice"; }
   function setIcon(target, name) { if (!target) return; target.replaceChildren(); if (typeof window.gaiaIconElement === "function") target.appendChild(window.gaiaIconElement(name)); }
@@ -106,7 +106,36 @@
   }
   async function pinRequest(body) { return apiRequest("/api/pin", body, 12000); }
   async function requestMessagingToken(cedula, pin) { const body = await apiRequest("/api/gaia-token", { cedula: cedula, pin: pin }, 15000); if (!body || typeof body.jwt !== "string" || body.jwt.length < 20) { const error = new Error("invalid-token-response"); error.code = "invalid-token-response"; throw error; } return body.jwt; }
-  async function authenticate(current, cedula, pin) { let jwt; try { jwt = await requestMessagingToken(cedula, pin); } catch (error) { const texts = { invalid_pin: "El PIN no es correcto. Intenta de nuevo.", locked: "Por seguridad, espera 15 minutos antes de volver a intentar.", pin_not_set: "Debes crear tu PIN antes de continuar.", service_timeout: "La validación está tardando más de lo normal. Intenta de nuevo." }; fail(current, texts[error.code] || "No pudimos verificar tu acceso. Intenta de nuevo."); return; } if (current !== attempt) return; try { window.zE("messenger", "loginUser", function (callback) { callback(jwt); }, function (error) { if (current !== attempt) return; if (error) { fail(current, "No pudimos autenticar el chat de Zendesk. Intenta de nuevo."); return; } clearTimeout(timeout); authenticated = true; currentCedula = cedula; button.disabled = false; form.hidden = true; message(""); showLanding(); }); } catch { fail(current, "No pudimos conectar el chat de Zendesk. Actualiza la página e intenta de nuevo."); } }
+  function loginErrorText(error) {
+    const reason = typeof error?.reason === "string" ? error.reason.replace(/[^a-z0-9_.-]/gi, "").slice(0, 60) : "";
+    return reason ? `Zendesk rechazó la autenticación (${reason}). Intenta de nuevo.` : "No pudimos autenticar el chat de Zendesk. Intenta de nuevo.";
+  }
+  function tokenErrorText(error) {
+    const texts = { invalid_pin: "El PIN no es correcto. Intenta de nuevo.", locked: "Por seguridad, espera 15 minutos antes de volver a intentar.", pin_not_set: "Debes crear tu PIN antes de continuar.", service_timeout: "La validación está tardando más de lo normal. Intenta de nuevo." };
+    return texts[error?.code] || "No pudimos verificar tu acceso. Intenta de nuevo.";
+  }
+  function authenticate(current, cedula, pin) {
+    if (current !== attempt) return;
+    try {
+      window.zE("messenger", "loginUser", async function (callback) {
+        try {
+          const jwt = await requestMessagingToken(cedula, pin);
+          if (current !== attempt) return;
+          callback(jwt);
+        } catch (error) { fail(current, tokenErrorText(error)); }
+      }, function (error) {
+        if (current !== attempt) return;
+        if (error) { fail(current, loginErrorText(error)); return; }
+        clearTimeout(timeout);
+        authenticated = true;
+        currentCedula = cedula;
+        button.disabled = false;
+        form.hidden = true;
+        message("");
+        showLanding();
+      });
+    } catch { fail(current, "No pudimos conectar el chat de Zendesk. Actualiza la página e intenta de nuevo."); }
+  }
   function slug(value) { return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40); }
   function openExistingConversations() { if (!authenticated || !currentCedula) return; const current = ++attempt; timeout = setTimeout(function () { fail(current, "GAIA está tardando en responder. Intenta de nuevo."); }, 20000); try { window.zE("messenger:set", "conversationFields", [{ id: FIELD_CEDULA, value: currentCedula }], function () { renderChat(current); }); } catch { fail(current, "No pudimos preparar la conversación. Intenta de nuevo."); } }
   function startConsultation() {
@@ -155,7 +184,21 @@
       });
     } catch { fail(current, "No pudimos preparar tu nueva solicitud. Intenta de nuevo."); }
   }
-  function connectWidget() { if (typeof window.zE !== "function") return false; window.zE("messenger:set", "locale", "es"); window.zE("messenger:set", "cookies", "functional"); window.zE("messenger:on", "close", showLanding); window.zE("messenger:set", "beforeMessageSent", function (outgoingMessage) { if (awaitingReply) { awaitingReply = false; clearInactivityTimer(); } return outgoingMessage; }); widgetAvailable = true; message("Ingresa tu cédula para continuar."); return true; }
+  function connectWidget() {
+    if (typeof window.zE !== "function" || widgetConnecting) return false;
+    widgetConnecting = true;
+    window.zE("messenger:set", "locale", "es");
+    window.zE("messenger:set", "cookies", "functional");
+    window.zE("messenger:on", "close", showLanding);
+    window.zE("messenger:set", "beforeMessageSent", function (outgoingMessage) { if (awaitingReply) { awaitingReply = false; clearInactivityTimer(); } return outgoingMessage; });
+    widgetReadyTimeout = setTimeout(function () { if (!widgetAvailable) message("No pudimos completar la conexión con Zendesk. Actualiza la página e intenta de nuevo.", true); }, 20000);
+    window.zE("messenger:get", "config", function () {
+      clearTimeout(widgetReadyTimeout);
+      widgetAvailable = true;
+      message("Ingresa tu cédula para continuar.");
+    });
+    return true;
+  }
   let checks = 0; const waiting = setInterval(function () { try { if (connectWidget()) clearInterval(waiting); else if (++checks >= 50) { clearInterval(waiting); message("No pudimos cargar GAIA. Actualiza la página e intenta de nuevo.", true); } } catch { clearInterval(waiting); message("No pudimos cargar GAIA. Actualiza la página e intenta de nuevo.", true); } }, 300);
   input.addEventListener("input", function () { input.removeAttribute("aria-invalid"); });
   [pinInput, pinConfirm].forEach(function (element) { element.addEventListener("input", function () { element.removeAttribute("aria-invalid"); }); });
@@ -180,7 +223,7 @@
     if (!/^[0-9]{4}$/.test(pin)) { pinInput.setAttribute("aria-invalid", "true"); message("El PIN debe tener 4 dígitos.", true); pinInput.focus(); return; }
     if (pinMode === "enroll" && pin !== pinConfirm.value) { pinConfirm.setAttribute("aria-invalid", "true"); message("Los PIN no coinciden.", true); pinConfirm.focus(); return; }
     if (!widgetAvailable) { message("GAIA todavía está cargando. Intenta de nuevo en un momento.", true); return; }
-    button.disabled = true; const current = ++attempt; timeout = setTimeout(function () { fail(current, "GAIA está tardando en responder. Intenta de nuevo."); }, 20000);
+    button.disabled = true; const current = ++attempt; timeout = setTimeout(function () { fail(current, "GAIA está tardando en responder. Intenta de nuevo."); }, 30000);
     try { if (pinMode === "enroll") await pinRequest({ action: "enroll", cedula: currentCedula, pin: pin }); authenticate(current, currentCedula, pin); }
     catch (error) { if (error.code === "already_enrolled") { pinMode = "verify"; showLanding(); message("El PIN ya fue creado. Ingresa tu PIN para continuar.", true); } else fail(current, "No pudimos crear tu PIN. Intenta de nuevo."); }
   });
