@@ -16,7 +16,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); } catch { return json({ error: "invalid_request" }, 400); }
   if (body?.action === "begin") return json(await beginMfa(env));
   if (body?.action === "enable") {
-    const recoveryCodes = await enableMfa(env, body.code);
+    const recoveryCodes = await enableMfa(env, body.code, body.enrollmentToken);
     return recoveryCodes ? json({ enabled: true, recoveryCodes }) : json({ error: "invalid_mfa" }, 400);
   }
   if (body?.action === "disable") {

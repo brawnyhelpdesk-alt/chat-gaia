@@ -260,18 +260,17 @@ export async function mfaStatus(env) {
 
 export async function beginMfa(env) {
   const secret = base32(crypto.getRandomValues(new Uint8Array(20)));
-  await env.GAIA_OPTIONS.put("gaia-admin-mfa-pending", JSON.stringify({ v: 1, secret: await seal(secret, env) }), { expirationTtl: 600 });
-  return { secret, uri: `otpauth://totp/GAIA%20Administrador?secret=${secret}&issuer=GAIA&algorithm=SHA1&digits=6&period=30` };
+  const enrollmentToken = await seal(JSON.stringify({ v: 1, secret, exp: Math.floor(Date.now() / 1000) + 900 }), env);
+  return { secret, enrollmentToken, uri: `otpauth://totp/GAIA%20Administrador?secret=${secret}&issuer=GAIA&algorithm=SHA1&digits=6&period=30` };
 }
 
-export async function enableMfa(env, code) {
-  const pending = await env.GAIA_OPTIONS.get("gaia-admin-mfa-pending", "json");
-  const secret = await unseal(pending?.secret, env);
-  if (!secret || !await verifyTotp(secret, code)) return null;
+export async function enableMfa(env, code, enrollmentToken) {
+  let enrollment;
+  try { enrollment = JSON.parse(await unseal(enrollmentToken, env)); } catch { return null; }
+  if (enrollment?.v !== 1 || typeof enrollment.secret !== "string" || !Number.isInteger(enrollment.exp) || enrollment.exp < Math.floor(Date.now() / 1000) || !await verifyTotp(enrollment.secret, code)) return null;
   const codes = newRecoveryCodes();
   const hashes = await Promise.all(codes.map((item) => recoveryHash(item, env)));
-  await env.GAIA_OPTIONS.put("gaia-admin-mfa", JSON.stringify({ v: 1, secret: await seal(secret, env), recovery: hashes, enabledAt: new Date().toISOString() }));
-  await env.GAIA_OPTIONS.delete("gaia-admin-mfa-pending");
+  await env.GAIA_OPTIONS.put("gaia-admin-mfa", JSON.stringify({ v: 1, secret: await seal(enrollment.secret, env), recovery: hashes, enabledAt: new Date().toISOString() }));
   return codes;
 }
 
