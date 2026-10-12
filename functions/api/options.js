@@ -21,7 +21,7 @@ function safeOptions(value) {
       title: typeof item.title === "string" ? item.title.slice(0, 70) : "Nueva solicitud",
       description: typeof item.description === "string" ? item.description.slice(0, 120) : "Solicitud corporativa",
       question: typeof item.question === "string" ? item.question.slice(0, 140) : "¿Qué necesitas?",
-      icon: typeof item.icon === "string" && /^[a-z0-9-]{2,40}$/i.test(item.icon) ? item.icon.toLowerCase() : "sparkles",
+      icon: typeof item.icon === "string" && (/^[a-z0-9-]{2,40}$/i.test(item.icon) || /^png:[a-z0-9_-]{12,64}$/i.test(item.icon)) ? item.icon.toLowerCase() : "sparkles",
       choices
     }];
   });
@@ -30,13 +30,23 @@ function safeOptions(value) {
 function safeIcons(value) {
   const permitted = new Set(["password", "access", "failure", "configuration", "equipment", "system", "consultation"]);
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-  return Object.fromEntries(Object.entries(value).flatMap(([key, icon]) => permitted.has(key) && typeof icon === "string" && /^[a-z0-9-]{2,40}$/i.test(icon) ? [[key, icon.toLowerCase()]] : []));
+  return Object.fromEntries(Object.entries(value).flatMap(([key, icon]) => permitted.has(key) && typeof icon === "string" && (/^[a-z0-9-]{2,40}$/i.test(icon) || /^png:[a-z0-9_-]{12,64}$/i.test(icon)) ? [[key, icon.toLowerCase()]] : []));
+}
+
+function safeLayout(saved, options) {
+  const base = ["password", "access", "failure", "configuration", "equipment", "system", "consultation"];
+  const allowed = new Set([...base, ...options.map((item) => `custom:${item.id}`)]);
+  const order = Array.isArray(saved?.order) ? saved.order.filter((key) => allowed.has(key)) : [];
+  for (const key of allowed) if (!order.includes(key)) order.push(key);
+  const hidden = Array.isArray(saved?.hidden) ? [...new Set(saved.hidden.filter((key) => allowed.has(key)))] : [];
+  return { order, hidden };
 }
 
 export async function onRequestGet({ env }) {
   try {
     const saved = env.GAIA_OPTIONS ? await env.GAIA_OPTIONS.get("custom-options", "json") : null;
-    return json({ options: safeOptions(saved?.options), icons: safeIcons(saved?.icons) });
+    const options = safeOptions(saved?.options);
+    return json({ options, icons: safeIcons(saved?.icons), ...safeLayout(saved, options), revision: Number(saved?.revision) || 0 });
   } catch {
     return json({ options: [], icons: {} });
   }

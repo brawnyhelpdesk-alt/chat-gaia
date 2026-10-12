@@ -59,7 +59,7 @@ async function sameSecret(value, expected) {
 export async function createSession(env) {
   const now = Math.floor(Date.now() / 1000);
   const nonce = base64Url(crypto.getRandomValues(new Uint8Array(18)));
-  const payload = base64Url(encoder.encode(JSON.stringify({ v: 1, exp: now + 60 * 60 * 8, nonce })));
+  const payload = base64Url(encoder.encode(JSON.stringify({ v: 1, exp: now + 60 * 60 * 2, nonce })));
   const signature = base64Url(await hmac(payload, env.GAIA_ADMIN_SIGNING_KEY));
   return `${payload}.${signature}`;
 }
@@ -108,7 +108,7 @@ export async function setAdminPassword(env, value) {
 }
 
 export function cookie(value) {
-  return `gaia_admin=${value}; Path=/api/admin/; HttpOnly; Secure; SameSite=Strict; Max-Age=28800`;
+  return `gaia_admin=${value}; Path=/api/admin/; HttpOnly; Secure; SameSite=Strict; Max-Age=7200`;
 }
 
 export function clearCookie() {
@@ -116,6 +116,12 @@ export function clearCookie() {
 }
 
 const baseOptionKeys = new Set(["password", "access", "failure", "configuration", "equipment", "system", "consultation"]);
+const builtInIconPattern = /^[a-z0-9-]{2,40}$/i;
+const uploadedIconPattern = /^png:[a-z0-9_-]{12,64}$/i;
+
+export function validIconReference(value) {
+  return typeof value === "string" && (builtInIconPattern.test(value) || uploadedIconPattern.test(value));
+}
 
 export function validOptions(value) {
   if (!Array.isArray(value) || value.length > 10) return null;
@@ -131,7 +137,7 @@ export function validOptions(value) {
     if (item.title.length > 70 || item.description.length > 120 || item.question.length > 140 || !Array.isArray(item.choices) || item.choices.length < 1 || item.choices.length > 12) return null;
     const choices = item.choices.map((choice) => typeof choice === "string" ? choice.trim() : "").filter(Boolean);
     if (choices.length !== item.choices.length || choices.some((choice) => choice.length > 100)) return null;
-    const icon = typeof item.icon === "string" && /^[a-z0-9-]{2,40}$/i.test(item.icon) ? item.icon.toLowerCase() : "sparkles";
+    const icon = validIconReference(item.icon) ? item.icon.toLowerCase() : "sparkles";
     cleaned.push({ id, title: item.title.trim(), description: item.description.trim(), question: item.question.trim(), choices, icon });
   }
   return cleaned;
@@ -141,10 +147,163 @@ export function validIcons(value) {
   if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).length > baseOptionKeys.size) return null;
   const cleaned = {};
   for (const [key, icon] of Object.entries(value)) {
-    if (!baseOptionKeys.has(key) || typeof icon !== "string" || !/^[a-z0-9-]{2,40}$/i.test(icon)) return null;
+    if (!baseOptionKeys.has(key) || !validIconReference(icon)) return null;
     cleaned[key] = icon.toLowerCase();
   }
   return cleaned;
+}
+
+export function validOrder(value, options) {
+  const custom = new Set((options || []).map((item) => `custom:${item.id}`));
+  const allowed = new Set([...baseOptionKeys, ...custom]);
+  const fallback = [...baseOptionKeys, ...custom];
+  if (!Array.isArray(value)) return fallback;
+  const result = [];
+  for (const key of value) {
+    if (typeof key !== "string" || !allowed.has(key) || result.includes(key)) return null;
+    result.push(key);
+  }
+  for (const key of fallback) if (!result.includes(key)) result.push(key);
+  return result;
+}
+
+export function validHidden(value, options) {
+  if (!Array.isArray(value)) return [];
+  const allowed = new Set([...baseOptionKeys, ...(options || []).map((item) => `custom:${item.id}`)]);
+  if (value.length > allowed.size || value.some((key) => typeof key !== "string" || !allowed.has(key))) return null;
+  return [...new Set(value)];
+}
+
+function base32(bytes) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = 0, value = 0, output = "";
+  for (const byte of bytes) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) { output += alphabet[(value >>> (bits - 5)) & 31]; bits -= 5; }
+  }
+  if (bits > 0) output += alphabet[(value << (5 - bits)) & 31];
+  return output;
+}
+
+function fromBase32(text) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = 0, value = 0;
+  const output = [];
+  for (const letter of String(text).replace(/=+$/g, "").toUpperCase()) {
+    const index = alphabet.indexOf(letter);
+    if (index < 0) return null;
+    value = (value << 5) | index;
+    bits += 5;
+    if (bits >= 8) { output.push((value >>> (bits - 8)) & 255); bits -= 8; }
+  }
+  return new Uint8Array(output);
+}
+
+async function encryptionKey(secret) {
+  const digest = await crypto.subtle.digest("SHA-256", encoder.encode(`gaia-admin-mfa:${secret}`));
+  return crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+
+async function seal(value, env) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await encryptionKey(env.GAIA_ADMIN_SIGNING_KEY), encoder.encode(value));
+  return { iv: base64Url(iv), value: base64Url(new Uint8Array(encrypted)) };
+}
+
+async function unseal(record, env) {
+  try {
+    const iv = decodeBase64Url(record?.iv || ""), value = decodeBase64Url(record?.value || "");
+    if (!iv || !value) return null;
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, await encryptionKey(env.GAIA_ADMIN_SIGNING_KEY), value);
+    return new TextDecoder().decode(plain);
+  } catch { return null; }
+}
+
+async function totp(secret, counter) {
+  const bytes = fromBase32(secret);
+  if (!bytes) return null;
+  const key = await crypto.subtle.importKey("raw", bytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
+  const message = new Uint8Array(8);
+  let value = BigInt(counter);
+  for (let index = 7; index >= 0; index -= 1) { message[index] = Number(value & 255n); value >>= 8n; }
+  const signature = new Uint8Array(await crypto.subtle.sign("HMAC", key, message));
+  const offset = signature[signature.length - 1] & 15;
+  const number = ((signature[offset] & 127) << 24) | (signature[offset + 1] << 16) | (signature[offset + 2] << 8) | signature[offset + 3];
+  return String(number % 1000000).padStart(6, "0");
+}
+
+async function verifyTotp(secret, code) {
+  if (!/^[0-9]{6}$/.test(String(code || ""))) return false;
+  const current = Math.floor(Date.now() / 30000);
+  for (let drift = -1; drift <= 1; drift += 1) if (await totp(secret, current + drift) === code) return true;
+  return false;
+}
+
+async function recoveryHash(code, env) {
+  return base64Url(await hmac(`gaia-admin-recovery:${String(code).replace(/[^A-Za-z0-9]/g, "").toUpperCase()}`, env.GAIA_ADMIN_SIGNING_KEY));
+}
+
+function newRecoveryCodes() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return Array.from({ length: 8 }, () => {
+    const bytes = crypto.getRandomValues(new Uint8Array(8));
+    const raw = Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("");
+    return `${raw.slice(0, 4)}-${raw.slice(4)}`;
+  });
+}
+
+export async function mfaStatus(env) {
+  const saved = env.GAIA_OPTIONS ? await env.GAIA_OPTIONS.get("gaia-admin-mfa", "json") : null;
+  return { enabled: saved?.v === 1 && !!saved.secret };
+}
+
+export async function beginMfa(env) {
+  const secret = base32(crypto.getRandomValues(new Uint8Array(20)));
+  await env.GAIA_OPTIONS.put("gaia-admin-mfa-pending", JSON.stringify({ v: 1, secret: await seal(secret, env) }), { expirationTtl: 600 });
+  return { secret, uri: `otpauth://totp/GAIA%20Administrador?secret=${secret}&issuer=GAIA&algorithm=SHA1&digits=6&period=30` };
+}
+
+export async function enableMfa(env, code) {
+  const pending = await env.GAIA_OPTIONS.get("gaia-admin-mfa-pending", "json");
+  const secret = await unseal(pending?.secret, env);
+  if (!secret || !await verifyTotp(secret, code)) return null;
+  const codes = newRecoveryCodes();
+  const hashes = await Promise.all(codes.map((item) => recoveryHash(item, env)));
+  await env.GAIA_OPTIONS.put("gaia-admin-mfa", JSON.stringify({ v: 1, secret: await seal(secret, env), recovery: hashes, enabledAt: new Date().toISOString() }));
+  await env.GAIA_OPTIONS.delete("gaia-admin-mfa-pending");
+  return codes;
+}
+
+export async function verifyMfa(env, code) {
+  const saved = await env.GAIA_OPTIONS.get("gaia-admin-mfa", "json");
+  if (saved?.v !== 1) return true;
+  const secret = await unseal(saved.secret, env);
+  if (secret && await verifyTotp(secret, String(code || ""))) return true;
+  const normalized = String(code || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  if (normalized.length !== 8 || !Array.isArray(saved.recovery)) return false;
+  const hash = await recoveryHash(normalized, env);
+  const index = saved.recovery.indexOf(hash);
+  if (index < 0) return false;
+  saved.recovery.splice(index, 1);
+  saved.usedRecoveryAt = new Date().toISOString();
+  await env.GAIA_OPTIONS.put("gaia-admin-mfa", JSON.stringify(saved));
+  return true;
+}
+
+export async function disableMfa(env) {
+  await env.GAIA_OPTIONS.delete("gaia-admin-mfa");
+  await env.GAIA_OPTIONS.delete("gaia-admin-mfa-pending");
+}
+
+export async function regenerateRecoveryCodes(env) {
+  const saved = await env.GAIA_OPTIONS.get("gaia-admin-mfa", "json");
+  if (saved?.v !== 1) return null;
+  const codes = newRecoveryCodes();
+  saved.recovery = await Promise.all(codes.map((item) => recoveryHash(item, env)));
+  saved.recoveryUpdatedAt = new Date().toISOString();
+  await env.GAIA_OPTIONS.put("gaia-admin-mfa", JSON.stringify(saved));
+  return codes;
 }
 
 export function validKioskSettings(value) {

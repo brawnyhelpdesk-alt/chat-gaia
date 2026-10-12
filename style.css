@@ -26,6 +26,7 @@ form { padding:28px 36px 30px; }
 .quick-choice:hover { border-color:#0d9aaa; background:#f4fbfc; box-shadow:0 9px 19px rgba(7,53,99,.08); transform:translateY(-1px); }
 .choice-icon { display:grid; width:30px; height:30px; margin-bottom:10px; border-radius:9px; place-items:center; color:#fff; background:linear-gradient(135deg,#073563,#0a4a79); }
 .choice-icon svg { width:17px; height:17px; display:block; }
+.choice-icon img { width:100%; height:100%; display:block; object-fit:cover; border-radius:8px; }
 .quick-choice.emphasis { border-color:#159bab; background:#f1fbfc; }
 .consultation-choice { border-color:#92b8cf; background:#f8fbfd; }
 .quick-choice strong,.quick-choice small { display:block; }

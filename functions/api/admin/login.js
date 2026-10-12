@@ -1,4 +1,4 @@
-import { cookie, createSession, json, originAllowed, verifyPassword } from "../_admin.js";
+import { cookie, createSession, json, mfaStatus, originAllowed, verifyMfa, verifyPassword } from "../_admin.js";
 
 async function rateLimit(request, env) {
   const source = request.headers.get("CF-Connecting-IP") || "unknown";
@@ -19,6 +19,9 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return json({ error: "invalid_request" }, 400); }
   if (!await verifyPassword(body?.password, env)) return json({ error: "invalid_credentials" }, 401);
+  const mfa = await mfaStatus(env);
+  if (mfa.enabled && !body?.code) return json({ error: "mfa_required" }, 401);
+  if (mfa.enabled && !await verifyMfa(env, body.code)) return json({ error: "invalid_mfa" }, 401);
   await env.GAIA_OPTIONS.delete(limiter.key);
   return json({ ok: true }, 200, { "Set-Cookie": cookie(await createSession(env)) });
 }

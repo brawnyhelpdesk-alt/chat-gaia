@@ -25,7 +25,19 @@
   let widgetAvailable = false, widgetConnecting = false, authenticated = false, currentCedula = "", selectedFlow = "", selectedChoice = "", pinMode = "cedula", attempt = 0, timeout, widgetReadyTimeout, inactivityTimer, awaitingReply = false;
   let updateKioskScroll = function () {};
   function message(text, error) { notice.textContent = text; notice.className = error ? "notice error" : "notice"; }
-  function setIcon(target, name) { if (!target) return; target.replaceChildren(); if (typeof window.gaiaIconElement === "function") target.appendChild(window.gaiaIconElement(name)); }
+  function setIcon(target, name) {
+    if (!target) return;
+    target.replaceChildren();
+    if (typeof name === "string" && /^png:[a-z0-9_-]{12,64}$/i.test(name)) {
+      const image = document.createElement("img");
+      image.src = `/api/icon/${name.slice(4)}`;
+      image.alt = "";
+      image.decoding = "async";
+      target.appendChild(image);
+      return;
+    }
+    if (typeof window.gaiaIconElement === "function") target.appendChild(window.gaiaIconElement(name));
+  }
   function applyIcons(overrides) {
     document.querySelectorAll("[data-option-key]").forEach(function (button) {
       const key = button.dataset.optionKey, icon = button.querySelector(".choice-icon");
@@ -69,6 +81,7 @@
     optionButton.className = "quick-choice";
     optionButton.type = "button";
     optionButton.dataset.flow = key;
+    optionButton.dataset.optionKey = `custom:${option.id.toLowerCase()}`;
     const icon = document.createElement("span"), optionTitle = document.createElement("strong"), optionDescription = document.createElement("small");
     icon.className = "choice-icon";
     icon.setAttribute("aria-hidden", "true");
@@ -77,7 +90,20 @@
     optionDescription.textContent = description;
     optionButton.append(icon, optionTitle, optionDescription);
     optionButton.addEventListener("click", function () { showFlow(key); });
-    customOptions.appendChild(optionButton);
+    customOptions.parentElement.insertBefore(optionButton, customOptions);
+  }
+  function applyCatalogLayout(order, hidden) {
+    const grid = customOptions?.parentElement;
+    if (!grid) return;
+    const buttons = Array.from(grid.querySelectorAll(":scope > [data-option-key]"));
+    const byKey = new Map(buttons.map(function (item) { return [item.dataset.optionKey, item]; }));
+    (Array.isArray(order) ? order : []).forEach(function (key) {
+      const item = byKey.get(key);
+      if (item) { grid.insertBefore(item, customOptions); byKey.delete(key); }
+    });
+    byKey.forEach(function (item) { grid.insertBefore(item, customOptions); });
+    const hiddenKeys = new Set(Array.isArray(hidden) ? hidden : []);
+    buttons.forEach(function (item) { item.hidden = hiddenKeys.has(item.dataset.optionKey); });
   }
   async function loadCustomOptions() {
     try {
@@ -87,6 +113,7 @@
       if (!config) return;
       applyIcons(config.icons);
       if (Array.isArray(config.options)) config.options.forEach(addCustomOption);
+      applyCatalogLayout(config.order, config.hidden);
     } catch {}
   }
   function renderChat(current) { if (current !== attempt) return; showChat(); window.zE("messenger", "render", { mode: "embedded", widget: { targetElement: "#gaia-chat" } }, function (error) { if (current !== attempt) return; if (error) { fail(current, "No pudimos abrir GAIA. Intenta de nuevo."); return; } clearTimeout(timeout); input.value = ""; button.disabled = false; message("Tu conversación con GAIA está abierta."); }); }
